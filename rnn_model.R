@@ -91,6 +91,6 @@ model %>% compile(optimizer = "adam", loss = "mse")
 
 #CBs <- callback_model_checkpoint(file.name, monitor = "val_loss", verbose = 0,  save_best_only = TRUE, save_weights_only = TRUE)
 {current_time <- Sys.time()
-        history <- model %>% fit(x = x.train, y = y.train, validation_split = 0.2, batch_size = 100, epochs = 25, verbose = 1)
+        history <- model %>% fit(x = x.train, y = y.train, validation_split = 0.2, batch_size = 100, epochs = 250, verbose = 1)
         Sys.time() - current_time}
 plot(history)
