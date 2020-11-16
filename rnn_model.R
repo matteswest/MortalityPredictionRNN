@@ -12,7 +12,7 @@ obsYears <- 2006
 country <- "DEUT"
 
 # Load data.
-data <- fread(file="mortality.csv")
+data <- fread("https://raw.githubusercontent.com/DeutscheAktuarvereinigung/Mortality_Modeling/master/mortality.csv")
 # Convert gender and country to factor variables.
 data$Gender <- as.factor(data$Gender)
 data$Country <- as.factor(data$Country)
