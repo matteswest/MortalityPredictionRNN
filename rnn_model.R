@@ -17,9 +17,9 @@ data <- fread("https://raw.githubusercontent.com/DeutscheAktuarvereinigung/Morta
 data$Gender <- as.factor(data$Gender)
 data$Country <- as.factor(data$Country)
 # Add column for mortality.
-data <- data %>% mutate(mortality=exp(log_mortality))
+data$mortality <- exp(data$log_mortality)
 # Filter relevant countries.
-data <- dplyr::filter(data,Country%in%c("CHE", "DEUT", "DNK", "ESP", "FRATNP", "ITA", "JPN", "POL", "USA"))
+data <- data[which(data$Country %in% c("CHE", "DEUT", "DNK", "ESP", "FRATNP", "ITA", "JPN", "POL", "USA")),]
 
 
 # function that outputs training data set
