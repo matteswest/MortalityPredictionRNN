@@ -9,18 +9,15 @@ create_lstm_model <- function(input_shape, unit_sizes, activation, recurrent_act
 
         input <- layer_input(shape = input_shape, dtype = "float32")
 
-        return_sequences <- TRUE
-        if (length(unit_sizes) == 1) {
-                return_sequences <- FALSE
-        }
-
         current_output <- input
 
-        for (layer_number in 1:(length(unit_sizes) - 1)) {
-                current_output <- layer_lstm(units = unit_sizes[layer_number], 
-                                             activation = activation, 
-                                             recurrent_activation = recurrent_activation, 
-                                             return_sequences = return_sequences)(current_output)
+        if (length(unit_sizes) > 1) {
+                for (layer_number in 1:(length(unit_sizes) - 1)) {
+                        current_output <- layer_lstm(units = unit_sizes[layer_number], 
+                                                     activation = activation, 
+                                                     recurrent_activation = recurrent_activation, 
+                                                     return_sequences = TRUE)(current_output)
+                }
         }
 
         # For the last LSTM-layer the output is not return as sequences.
