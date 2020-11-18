@@ -67,7 +67,7 @@ model <- create_lstm_model(c(timesteps, feature_dimension0), c(feature_dimension
 summary(model)
 
 # Compile network.
-model %>% compile(optimizer = "adam", loss = "mse")
+model %>% compile(optimizer = "adam", loss = "mse", metrics = list("mae"))
 
 # TODO: Use callbacks.
 #CBs <- callback_model_checkpoint(file.name, monitor = "val_loss", verbose = 0,  save_best_only = TRUE, save_weights_only = TRUE)
