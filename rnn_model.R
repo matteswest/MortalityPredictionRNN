@@ -63,15 +63,6 @@ data2.Male <- data[which((data$Year > (last_observed_year-timesteps)) & (Gender=
 x_val_male <- data2.Male
 y_val_male <- x_val_male[which(x_val_male$Year > last_observed_year),]
 
-# Define network. Here we use two LSTM layers.
-#Input <- layer_input(shape=c(timesteps, feature_dimension0), dtype = 'float32', name = 'Input') 
-#Output = Input %>%
-#         layer_lstm(units = feature_dimension1, activation = 'tanh', recurrent_activation = 'tanh', 
-#                    return_sequences = TRUE, name = 'LSTM1') %>%
-#         layer_lstm(units = feature_dimension2, activation='tanh', recurrent_activation ='tanh', name='LSTM2') %>%
-#         layer_dense(units = 1, activation = NULL, name = "Output",
-#                     weights = list(array(0,dim = c(feature_dimension2,1)), array(log(average_label),dim = c(1))))
-#model <- keras_model(inputs = list(Input), outputs = c(Output))
 model <- create_lstm_model(c(timesteps, feature_dimension0), c(feature_dimension0, feature_dimension1), "tanh", "tanh", average_label)
 summary(model)
 
