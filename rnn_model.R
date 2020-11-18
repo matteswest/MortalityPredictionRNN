@@ -13,7 +13,7 @@ feature_dimension0 <- 5
 feature_dimension1 <- 20
 feature_dimension2 <- 15
 last_observed_year <- 2006
-country <- "DEUT"
+country <- "CHE"
 
 # Load data.
 data <- fread("https://raw.githubusercontent.com/DeutscheAktuarvereinigung/Mortality_Modeling/master/mortality.csv")
@@ -50,7 +50,7 @@ for (l in 1:sample_size){
 #x_min <- min(x_train)
 #x_max <- max(x_train)
 #x_train <- list(array(2*(x_train-x_min)/(x_min-x_max)-1, dim(x_train)), gender_indicator)
-x_train <- list(x_train)
+x_train <- list(x_train, gender_indicator)
 
 # The mean of y_train will be used as starting value for the intercept weight as it leeds to 
 # faster convergence.
@@ -73,7 +73,7 @@ model %>% compile(optimizer = "adam", loss = "mse", metrics = list("mae"))
 # TODO: Use callbacks.
 #CBs <- callback_model_checkpoint(file.name, monitor = "val_loss", verbose = 0,  save_best_only = TRUE, save_weights_only = TRUE)
 {current_time <- Sys.time()
-        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 150, verbose = 1)
+        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 50, verbose = 1)
 Sys.time() - current_time}
 plot(history)
 
