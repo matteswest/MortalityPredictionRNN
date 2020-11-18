@@ -73,7 +73,7 @@ model %>% compile(optimizer = "adam", loss = "mse", metrics = list("mae"))
 #CBs <- callback_model_checkpoint(file.name, monitor = "val_loss", verbose = 0,  save_best_only = TRUE, save_weights_only = TRUE)
 {current_time <- Sys.time()
         history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 150, verbose = 1)
-        Sys.time() - current_time}
+Sys.time() - current_time}
 plot(history)
 
 # calculating out-of-sample loss: LC is c(Female=0.6045, Male=1.8152)
