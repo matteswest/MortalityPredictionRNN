@@ -34,11 +34,11 @@ if ( (dim(data_female[[1]])[1] != dim(data_male[[1]])[1]) | (dim(data_female[[2]
         stop("Shapes of female and male are not the same!")
 
 # Merge female and male data into one set.
-sample_number <- dim(data_female[[1]])[1]
-x_train <- array(NA, dim=c(2*sample_number, dim(data_female[[1]])[c(2,3)]))
-y_train <- array(NA, dim=c(2*sample_number))
-gender_indicator <- rep(c(0,1), sample_number)
-for (l in 1:sample_number){
+sample_size <- dim(data_female[[1]])[1]
+x_train <- array(NA, dim=c(2*sample_size, dim(data_female[[1]])[c(2,3)]))
+y_train <- array(NA, dim=c(2*sample_size))
+gender_indicator <- rep(c(0,1), sample_size)
+for (l in 1:sample_size){
         x_train[(l-1)*2+1,,] <- data_female[[1]][l,,]
         x_train[(l-1)*2+2,,] <- data_male[[1]][l,,]
         # Invert label sign.
