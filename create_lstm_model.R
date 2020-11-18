@@ -1,0 +1,32 @@
+library("keras")
+
+# The following function creates a LSTM model based on the given parameters:
+# - input_shape: (timesteps, feature_dimension).
+# - unit_sizes: number of units in a LSTM-layer, the length of unit_sizes corresponds to the 
+#               number of LSTM-layers.
+# - average_label: is used as an initialization for the weight in the last dense layer for faster convergence.
+create_lstm_model <- function(input_shape, unit_sizes, activation, recurrent_activation, average_label) {
+
+        input <- layer_input(shape = input_shape, dtype = "float32")
+
+        return_sequences <- TRUE
+        if (length(unit_sizes) == 1) {
+                return_sequences <- FALSE
+        }
+
+        current_output <- input
+
+        for (layer_number in 1:(length(unit_sizes) - 1)) {
+                current_output <- layer_lstm(units = unit_sizes[layer_number], 
+                                             activation = activation, 
+                                             recurrent_activation = recurrent_activation, 
+                                             return_sequences = return_sequences)(current_output)
+        }
+
+        # For the last LSTM-layer the output is not return as sequences.
+        current_output <- layer_lstm(units = unit_sizes[length(unit_sizes)], activation = activation, recurrent_activation = recurrent_activation, return_sequences = FALSE)(current_output)
+        output <- layer_dense(units = 1, activation = NULL, weights = list(array(0, dim = c(unit_sizes[length(unit_sizes)], 1)), array(log(average_label) ,dim = c(1))))(current_output)
+
+        model <- keras_model(inputs = list(input), outputs = c(output))
+
+}
