@@ -26,8 +26,8 @@ data$mortality <- exp(data$log_mortality)
 data <- data[which(data$Country %in% c("CHE", "DEUT", "DNK", "ESP", "FRATNP", "ITA", "JPN", "POL", "USA")),]
 
 # Split data into female and male.
-data_female <- data.preprocessing(data, "Female", country, timesteps, feature_dimension0, last_observed_year)
-data_male <- data.preprocessing(data, "Male", country, timesteps, feature_dimension0, last_observed_year)
+data_female <- data_preprocessing(data, "Female", country, timesteps, feature_dimension0, last_observed_year)
+data_male <- data_preprocessing(data, "Male", country, timesteps, feature_dimension0, last_observed_year)
 
 # Check if dimensions of male and female data match.
 if ( (dim(data_female[[1]])[1] != dim(data_male[[1]])[1]) | (dim(data_female[[2]])[1] != dim(data_male[[2]])[1]) )
@@ -56,14 +56,6 @@ x_train <- list(x_train, gender_indicator)
 # faster convergence.
 average_label <- mean(y_train)
 
-# Validation data pre-processing.
-data2_female <- data[which((data$Year > (last_observed_year-timesteps)) & (Gender=="Female")),]
-x_val_female <- data2_female
-y_val_female <- x_val_female[which(x_val_female$Year > last_observed_year),]
-data2.Male <- data[which((data$Year > (last_observed_year-timesteps)) & (Gender=="Male")),]
-x_val_male <- data2.Male
-y_val_male <- x_val_male[which(x_val_male$Year > last_observed_year),]
-
 model <- create_lstm_model(c(timesteps, feature_dimension0), c(feature_dimension0, feature_dimension1), "tanh", "tanh", average_label)
 summary(model)
 
@@ -77,12 +69,20 @@ model %>% compile(optimizer = "adam", loss = "mse", metrics = list("mae"))
 Sys.time() - current_time}
 plot(history)
 
+# Validation data pre-processing.
+data2_female <- data[which((data$Year > (last_observed_year - timesteps)) & (Gender == "Female") & (Country == country)),]
+x_test_female <- data2_female
+y_test_female <- x_test_female[which(x_test_female$Year > last_observed_year),]
+data2.male <- data[which((data$Year > (last_observed_year-timesteps)) & (Gender == "Male") & (Country == country)),]
+x_test_male <- data2.male
+y_test_male <- x_test_male[which(x_test_male$Year > last_observed_year),]
+
 # calculating out-of-sample loss: LC is c(Female=0.6045, Male=1.8152)
 # Female
-#pred.result <- recursive.prediction.Gender(last_observed_year, data2_female, "Female", timesteps, feature_dimension0, x_min, x_max, model)
-#vali <- pred.result[[1]][which(data2_female$Year > last_observed_year),]
-#round(10^4*mean((vali$mx-y_val_female$mx)^2),4)
-## Male
-#pred.result <- recursive.prediction.Gender(last_observed_year, data2.Male, "Male", timesteps, feature_dimension0, x_min, x_max, model)
-#vali <- pred.result[[1]][which(data2.Male$Year > last_observed_year),]
-#round(10^4*mean((vali$mx-y_val_male$mx)^2),4)
+prediction_result <- recursive_prediction(last_observed_year, data2_female, "Female", country, timesteps, feature_dimension0, model)
+#vali <- prediction_result[[1]][which(data2_female$Year > last_observed_year),]
+#mean((vali$mx-y_test_female$mx)^2)
+# Male
+prediction_result <- recursive_prediction(last_observed_year, data2.male, "Male", country, timesteps, feature_dimension0, model)
+#vali <- prediction_result[[1]][which(data2.male$Year > last_observed_year),]
+#mean((vali$mx-y_test_male$mx)^2)
