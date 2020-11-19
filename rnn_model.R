@@ -19,7 +19,7 @@ country <- "CHE"
 use_best_model <- TRUE
 
 # Load data.
-data <- fread("https://raw.githubusercontent.com/DeutscheAktuarvereinigung/Mortality_Modeling/master/mortality.csv")
+data <- fread("./data/mortality.csv")
 # Convert gender and country to factor variables.
 data$Gender <- as.factor(data$Gender)
 data$Country <- as.factor(data$Country)
