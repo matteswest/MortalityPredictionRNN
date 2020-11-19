@@ -16,6 +16,8 @@ feature_dimension2 <- 10
 last_observed_year <- 1999
 country <- "CHE"
 
+useCallbacks <- FALSE
+
 # Load data.
 data <- fread("https://raw.githubusercontent.com/DeutscheAktuarvereinigung/Mortality_Modeling/master/mortality.csv")
 # Convert gender and country to factor variables.
@@ -57,7 +59,9 @@ x_train <- list(array(2*(x_train-x_min)/(x_min-x_max)-1, dim(x_train)), gender_i
 # faster convergence.
 average_label <- mean(y_train)
 
-model <- create_lstm_model(c(timesteps, age_range), c(feature_dimension0, feature_dimension1, feature_dimension2), "tanh", "tanh", average_label)
+unit_sizes <- c(feature_dimension0, feature_dimension1, feature_dimension2)
+
+model <- create_lstm_model(c(timesteps, age_range), unit_sizes, "tanh", "tanh", average_label)
 summary(model)
 
 # Compile network.
@@ -68,10 +72,22 @@ lr_reducer <- callback_reduce_lr_on_plateau(monitor = "val_loss", factor = 0.1,
                                             patience = 25, verbose = 0, mode = "min",
                                             min_delta = 1e-03, cooldown = 0, min_lr = 0)
 
-# TODO: Use callbacks.
-#CBs <- callback_model_checkpoint(file.name, monitor = "val_loss", verbose = 0,  save_best_only = TRUE, save_weights_only = TRUE)
+# Name model
+model_name <- paste0("LSTM", length(unit_sizes),"_", age_range, "_", feature_dimension0, "_",
+                    feature_dimension1, "_", feature_dimension2)
+#file.name <- paste("./Model_Full_Param/best_model_", name.model, sep="")
+file_name <- paste0("./CallBack/best_model_", model_name)
+
+# define Callback to save best model w.r.t. loss value (mse)
+CBs <- NULL
+if (useCallbacks) {
+        CBs <- callback_model_checkpoint(file_name, monitor = "val_loss", verbose = 0,
+                                         save_best_only = TRUE, save_weights_only = TRUE)
+}
+
+# Fit model and measure time
 {current_time <- Sys.time()
-        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 250, verbose = 1, callbacks = list(lr_reducer))
+        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 250, verbose = 1, callbacks = list(lr_reducer, CBs))
 Sys.time() - current_time}
 plot(history)
 
@@ -82,6 +98,10 @@ y_test_female <- x_test_female[which(x_test_female$Year > last_observed_year),]
 data2_male <- data[which((data$Year > (last_observed_year-timesteps)) & (Gender == "Male") & (Country == country)),]
 x_test_male <- data2_male
 y_test_male <- x_test_male[which(x_test_male$Year > last_observed_year),]
+
+# Calculate in-sample loss
+if (useCallbacks) load_model_weights_hdf5(model, file_name)
+mean((exp(as.vector(model %>% predict(x_train))) - exp(y_train))^2)
 
 # calculating out-of-sample loss: LC is c(Female=0.6045, Male=1.8152)
 # Female
