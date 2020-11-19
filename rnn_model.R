@@ -16,7 +16,7 @@ feature_dimension2 <- 10
 last_observed_year <- 1999
 country <- "CHE"
 
-useCallbacks <- TRUE
+use_best_model <- TRUE
 
 # Load data.
 data <- fread("https://raw.githubusercontent.com/DeutscheAktuarvereinigung/Mortality_Modeling/master/mortality.csv")
@@ -72,6 +72,8 @@ lr_reducer <- callback_reduce_lr_on_plateau(monitor = "val_loss", factor = 0.1,
                                             patience = 25, verbose = 0, mode = "min",
                                             min_delta = 1e-03, cooldown = 0, min_lr = 0)
 
+callback_list <- list(lr_reducer)
+
 # Name model
 model_name <- paste0("LSTM", length(unit_sizes),"_", age_range, "_", feature_dimension0, "_",
                     feature_dimension1, "_", feature_dimension2)
@@ -80,14 +82,17 @@ file_name <- paste0("./CallBack/best_model_", model_name)
 
 # define Callback to save best model w.r.t. loss value (mse)
 CBs <- NULL
-if (useCallbacks) {
+if (use_best_model) {
         CBs <- callback_model_checkpoint(file_name, monitor = "val_loss", verbose = 0,
                                          save_best_only = TRUE, save_weights_only = TRUE)
+        callback_list <- c(callback_list, CBs)
 }
+
+
 
 # Fit model and measure time
 {current_time <- Sys.time()
-        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 250, verbose = 1, callbacks = list(lr_reducer, CBs))
+        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 50, verbose = 1, callbacks = callback_list)
 Sys.time() - current_time}
 plot(history)
 
@@ -100,7 +105,7 @@ x_test_male <- data2_male
 y_test_male <- x_test_male[which(x_test_male$Year > last_observed_year),]
 
 # Calculate in-sample loss
-if (useCallbacks) load_model_weights_hdf5(model, file_name)
+if (use_best_model) load_model_weights_hdf5(model, file_name)
 mean((exp(as.vector(model %>% predict(x_train))) - exp(y_train))^2)
 
 # calculating out-of-sample loss: LC is c(Female=0.6045, Male=1.8152)
