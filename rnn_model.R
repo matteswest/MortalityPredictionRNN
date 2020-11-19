@@ -6,6 +6,7 @@ library(keras)
 # import source codes
 source("data_preparation.R")
 source("create_lstm_model.R")
+source("shuffle_data.R")
 
 # Set parameters.
 timesteps <- 10
@@ -54,6 +55,12 @@ for (l in 1:sample_size){
 #x_max <- max(x_train)
 #x_train <- list(array(2*(x_train-x_min)/(x_min-x_max)-1, dim(x_train)), gender_indicator)
 x_train <- list(x_train, gender_indicator)
+
+# Shuffle the training data.
+combined_training_set <- shuffle_data(x_train, y_train)
+x_train <- combined_training_set[[1]]
+y_train <- combined_training_set[[2]]
+rm(combined_training_set)
 
 # The mean of y_train will be used as starting value for the intercept weight as it leeds to 
 # faster convergence.
