@@ -10,9 +10,9 @@ source("create_lstm_model.R")
 # Set parameters.
 timesteps <- 10
 age_range <- 5
-feature_dimension0 <- 5
-feature_dimension1 <- 20
-feature_dimension2 <- 15
+feature_dimension0 <- 20
+feature_dimension1 <- 15
+feature_dimension2 <- 10
 last_observed_year <- 1999
 country <- "CHE"
 
@@ -48,10 +48,10 @@ for (l in 1:sample_size){
 }
 
 # MinMaxScaler data pre-processing.
-#x_min <- min(x_train)
-#x_max <- max(x_train)
-#x_train <- list(array(2*(x_train-x_min)/(x_min-x_max)-1, dim(x_train)), gender_indicator)
-x_train <- list(x_train, gender_indicator)
+x_min <- min(x_train)
+x_max <- max(x_train)
+x_train <- list(array(2*(x_train-x_min)/(x_min-x_max)-1, dim(x_train)), gender_indicator)
+#x_train <- list(x_train, gender_indicator)
 
 # The mean of y_train will be used as starting value for the intercept weight as it leeds to 
 # faster convergence.
@@ -61,12 +61,17 @@ model <- create_lstm_model(c(timesteps, age_range), c(feature_dimension0, featur
 summary(model)
 
 # Compile network.
-model %>% compile(optimizer = "adam", loss = "mse", metrics = list("mae"))
+optimizer <- optimizer_adam()
+model %>% compile(optimizer = optimizer, loss = "mse", metrics = list("mae"))
+
+lr_reducer <- callback_reduce_lr_on_plateau(monitor = "val_loss", factor = 0.1,
+                                            patience = 25, verbose = 0, mode = "min",
+                                            min_delta = 1e-03, cooldown = 0, min_lr = 0)
 
 # TODO: Use callbacks.
 #CBs <- callback_model_checkpoint(file.name, monitor = "val_loss", verbose = 0,  save_best_only = TRUE, save_weights_only = TRUE)
 {current_time <- Sys.time()
-        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 250, verbose = 1)
+        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 250, verbose = 1, callbacks = list(lr_reducer))
 Sys.time() - current_time}
 plot(history)
 
@@ -80,7 +85,7 @@ y_test_male <- x_test_male[which(x_test_male$Year > last_observed_year),]
 
 # calculating out-of-sample loss: LC is c(Female=0.6045, Male=1.8152)
 # Female
-prediction_and_mse <- recursive_prediction(last_observed_year, data2_female, "Female", country, timesteps, feature_dimension0, model)
+prediction_and_mse <- recursive_prediction(last_observed_year, data2_female, "Female", country, timesteps, age_range, model, x_min, x_max)
 # Filter the predicted mortality rates.
 prediction <- prediction_and_mse[[1]][which(data2_female$Year > last_observed_year),]
 print("MSE female mortality: ")
@@ -89,7 +94,7 @@ print("MSE female log_mortality: ")
 mean((prediction$log_mortality - y_test_female$log_mortality)^2)
 
 # Male
-prediction_and_mse <- recursive_prediction(last_observed_year, data2_male, "Male", country, timesteps, feature_dimension0, model)
+prediction_and_mse <- recursive_prediction(last_observed_year, data2_male, "Male", country, timesteps, age_range, model, x_min, x_max)
 # Filter the predicted mortality rates.
 prediction <- prediction_and_mse[[1]][which(data2_male$Year > last_observed_year),]
 print("MSE male mortality: ")

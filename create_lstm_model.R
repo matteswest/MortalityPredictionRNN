@@ -18,11 +18,13 @@ create_lstm_model <- function(input_shape, unit_sizes, activation, recurrent_act
                                                      activation = activation, 
                                                      recurrent_activation = recurrent_activation, 
                                                      return_sequences = TRUE)(current_output)
+                        #current_output <- layer_batch_normalization()(current_output)
                 }
         }
 
         # For the last LSTM-layer the output is not return as sequences.
         current_output <- layer_lstm(units = unit_sizes[length(unit_sizes)], activation = activation, recurrent_activation = recurrent_activation, return_sequences = FALSE)(current_output)
+        #current_output <- layer_batch_normalization()(current_output)
 
         # Concatenate LSTM result and gender indicator.
         concatenated_tensor <- layer_concatenate(list(current_output, input_gender))
