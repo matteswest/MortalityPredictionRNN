@@ -32,7 +32,7 @@ data_preprocessing <- function(data.raw, gender, country, timesteps, feature_dim
 
 
 
-recursive_prediction <- function(last_observed_years, subdata, gender, country, timesteps, feature_dimension, model, x_min, x_max){
+recursive_prediction <- function(last_observed_years, subdata, gender, country, timesteps, feature_dimension, model) {#, x_min, x_max){
 
         yearly_mse <- array(NA, c(2016 - last_observed_years))
 

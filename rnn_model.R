@@ -108,7 +108,7 @@ mean((exp(as.vector(model %>% predict(x_train))) - exp(y_train))^2)
 
 # calculating out-of-sample loss: LC is c(Female=0.6045, Male=1.8152)
 # Female
-prediction_and_mse <- recursive_prediction(last_observed_year, data2_female, "Female", country, timesteps, age_range, model, x_min, x_max)
+prediction_and_mse <- recursive_prediction(last_observed_year, data2_female, "Female", country, timesteps, age_range, model) #, x_min, x_max)
 # Filter the predicted mortality rates.
 prediction <- prediction_and_mse[[1]][which(data2_female$Year > last_observed_year),]
 print("MSE female mortality: ")
@@ -117,7 +117,7 @@ print("MSE female log_mortality: ")
 mean((prediction$log_mortality - y_test_female$log_mortality)^2)
 
 # Male
-prediction_and_mse <- recursive_prediction(last_observed_year, data2_male, "Male", country, timesteps, age_range, model, x_min, x_max)
+prediction_and_mse <- recursive_prediction(last_observed_year, data2_male, "Male", country, timesteps, age_range, model) #, x_min, x_max)
 # Filter the predicted mortality rates.
 prediction <- prediction_and_mse[[1]][which(data2_male$Year > last_observed_year),]
 print("MSE male mortality: ")
