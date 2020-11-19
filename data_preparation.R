@@ -31,8 +31,6 @@ data_preprocessing <- function(data.raw, gender, country, timesteps, feature_dim
 }
 
 
-# Recursive Prediction for both genders (copied from 
-# https://github.com/JSchelldorfer/ActuarialDataScience/blob/master/6%20-%20Lee%20and%20Carter%20go%20Machine%20Learning%20Recurrent%20Neural%20Networks/00_c%20package%20-%20data%20preparation%20RNNs.R)
 
 recursive_prediction <- function(last_observed_years, subdata, gender, country, timesteps, feature_dimension, model){
 
@@ -40,7 +38,7 @@ recursive_prediction <- function(last_observed_years, subdata, gender, country, 
 
         for (current_year in ((last_observed_years+1):2016)){
                 # Select only the necessary for the current year.
-                data_current_year <- data.preprocessing(subdata[which(subdata$Year >= (current_year - timesteps)),], gender, country, timesteps, feature_dimension, current_year)
+                data_current_year <- data_preprocessing(subdata[which(subdata$Year >= (current_year - timesteps)),], gender, country, timesteps, feature_dimension, current_year)
 
                 # MinMaxScaler (with minimum and maximum from above)
                 #x_test <- array(2*(data_current_year[[1]]-x.min)/(x.min-x.max)-1, dim(data_current_year[[1]]))
