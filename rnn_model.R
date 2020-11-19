@@ -88,8 +88,6 @@ if (use_best_model) {
         callback_list <- c(callback_list, CBs)
 }
 
-
-
 # Fit model and measure time
 {current_time <- Sys.time()
         history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 250, verbose = 1, callbacks = callback_list)
