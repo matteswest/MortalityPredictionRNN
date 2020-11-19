@@ -9,10 +9,11 @@ source("create_lstm_model.R")
 
 # Set parameters.
 timesteps <- 10
+age_range <- 5
 feature_dimension0 <- 5
 feature_dimension1 <- 20
 feature_dimension2 <- 15
-last_observed_year <- 2006
+last_observed_year <- 1999
 country <- "CHE"
 
 # Load data.
@@ -26,8 +27,8 @@ data$mortality <- exp(data$log_mortality)
 data <- data[which(data$Country %in% c("CHE", "DEUT", "DNK", "ESP", "FRATNP", "ITA", "JPN", "POL", "USA")),]
 
 # Split data into female and male.
-data_female <- data_preprocessing(data, "Female", country, timesteps, feature_dimension0, last_observed_year)
-data_male <- data_preprocessing(data, "Male", country, timesteps, feature_dimension0, last_observed_year)
+data_female <- data_preprocessing(data, "Female", country, timesteps, age_range, last_observed_year)
+data_male <- data_preprocessing(data, "Male", country, timesteps, age_range, last_observed_year)
 
 # Check if dimensions of male and female data match.
 if ( (dim(data_female[[1]])[1] != dim(data_male[[1]])[1]) | (dim(data_female[[2]])[1] != dim(data_male[[2]])[1]) )
@@ -56,7 +57,7 @@ x_train <- list(x_train, gender_indicator)
 # faster convergence.
 average_label <- mean(y_train)
 
-model <- create_lstm_model(c(timesteps, feature_dimension0), c(feature_dimension0, feature_dimension1), "tanh", "tanh", average_label)
+model <- create_lstm_model(c(timesteps, age_range), c(feature_dimension0, feature_dimension1, feature_dimension2), "tanh", "tanh", average_label)
 summary(model)
 
 # Compile network.
@@ -65,7 +66,7 @@ model %>% compile(optimizer = "adam", loss = "mse", metrics = list("mae"))
 # TODO: Use callbacks.
 #CBs <- callback_model_checkpoint(file.name, monitor = "val_loss", verbose = 0,  save_best_only = TRUE, save_weights_only = TRUE)
 {current_time <- Sys.time()
-        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 50, verbose = 1)
+        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 250, verbose = 1)
 Sys.time() - current_time}
 plot(history)
 
@@ -73,16 +74,25 @@ plot(history)
 data2_female <- data[which((data$Year > (last_observed_year - timesteps)) & (Gender == "Female") & (Country == country)),]
 x_test_female <- data2_female
 y_test_female <- x_test_female[which(x_test_female$Year > last_observed_year),]
-data2.male <- data[which((data$Year > (last_observed_year-timesteps)) & (Gender == "Male") & (Country == country)),]
-x_test_male <- data2.male
+data2_male <- data[which((data$Year > (last_observed_year-timesteps)) & (Gender == "Male") & (Country == country)),]
+x_test_male <- data2_male
 y_test_male <- x_test_male[which(x_test_male$Year > last_observed_year),]
 
 # calculating out-of-sample loss: LC is c(Female=0.6045, Male=1.8152)
 # Female
-prediction_result <- recursive_prediction(last_observed_year, data2_female, "Female", country, timesteps, feature_dimension0, model)
-#vali <- prediction_result[[1]][which(data2_female$Year > last_observed_year),]
-#mean((vali$mx-y_test_female$mx)^2)
+prediction_and_mse <- recursive_prediction(last_observed_year, data2_female, "Female", country, timesteps, feature_dimension0, model)
+# Filter the predicted mortality rates.
+prediction <- prediction_and_mse[[1]][which(data2_female$Year > last_observed_year),]
+print("MSE female mortality: ")
+mean((prediction$mortality - y_test_female$mortality)^2)
+print("MSE female log_mortality: ")
+mean((prediction$log_mortality - y_test_female$log_mortality)^2)
+
 # Male
-prediction_result <- recursive_prediction(last_observed_year, data2.male, "Male", country, timesteps, feature_dimension0, model)
-#vali <- prediction_result[[1]][which(data2.male$Year > last_observed_year),]
-#mean((vali$mx-y_test_male$mx)^2)
+prediction_and_mse <- recursive_prediction(last_observed_year, data2_male, "Male", country, timesteps, feature_dimension0, model)
+# Filter the predicted mortality rates.
+prediction <- prediction_and_mse[[1]][which(data2_male$Year > last_observed_year),]
+print("MSE male mortality: ")
+mean((prediction$mortality - y_test_male$mortality)^2)
+print("MSE male log_mortality: ")
+mean((prediction$log_mortality - y_test_male$log_mortality)^2)
