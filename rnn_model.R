@@ -92,7 +92,7 @@ if (use_best_model) {
 
 # Fit model and measure time
 {current_time <- Sys.time()
-        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 50, verbose = 1, callbacks = callback_list)
+        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 250, verbose = 1, callbacks = callback_list)
 Sys.time() - current_time}
 plot(history)
 
