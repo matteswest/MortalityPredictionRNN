@@ -41,8 +41,8 @@ recursive_prediction <- function(last_observed_years, subdata, gender, country, 
                 data_current_year <- data_preprocessing(subdata[which(subdata$Year >= (current_year - timesteps)),], gender, country, timesteps, feature_dimension, current_year)
 
                 # MinMaxScaler (with minimum and maximum from above)
-                x_test <- array(2*(data_current_year[[1]]-x_min)/(x_min-x_max)-1, dim(data_current_year[[1]]))
-                #x_test <- array(data_current_year[[1]], dim(data_current_year[[1]]))
+                #x_test <- array(2*(data_current_year[[1]]-x_min)/(x_min-x_max)-1, dim(data_current_year[[1]]))
+                x_test <- array(data_current_year[[1]], dim(data_current_year[[1]]))
 
                 if (gender == "Female")
                         gender_index <- 0

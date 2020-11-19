@@ -28,7 +28,7 @@ create_lstm_model <- function(input_shape, unit_sizes, activation, recurrent_act
 
         # Concatenate LSTM result and gender indicator.
         concatenated_tensor <- layer_concatenate(list(current_output, input_gender))
-        output <- layer_dense(units = 1, activation = NULL, weights = list(array(0, dim = c(unit_sizes[length(unit_sizes)] + 1, 1)), array(log(average_label) ,dim = c(1))))(concatenated_tensor)
+        output <- layer_dense(units = 1, activation = "k_exp", weights = list(array(0, dim = c(unit_sizes[length(unit_sizes)] + 1, 1)), array(log(average_label) ,dim = c(1))))(concatenated_tensor)
 
         model <- keras_model(inputs = list(input, input_gender), outputs = c(output))
 

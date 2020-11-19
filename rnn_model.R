@@ -16,7 +16,7 @@ feature_dimension2 <- 10
 last_observed_year <- 1999
 country <- "CHE"
 
-useCallbacks <- FALSE
+useCallbacks <- TRUE
 
 # Load data.
 data <- fread("https://raw.githubusercontent.com/DeutscheAktuarvereinigung/Mortality_Modeling/master/mortality.csv")
@@ -50,10 +50,10 @@ for (l in 1:sample_size){
 }
 
 # MinMaxScaler data pre-processing.
-x_min <- min(x_train)
-x_max <- max(x_train)
-x_train <- list(array(2*(x_train-x_min)/(x_min-x_max)-1, dim(x_train)), gender_indicator)
-#x_train <- list(x_train, gender_indicator)
+#x_min <- min(x_train)
+#x_max <- max(x_train)
+#x_train <- list(array(2*(x_train-x_min)/(x_min-x_max)-1, dim(x_train)), gender_indicator)
+x_train <- list(x_train, gender_indicator)
 
 # The mean of y_train will be used as starting value for the intercept weight as it leeds to 
 # faster convergence.
