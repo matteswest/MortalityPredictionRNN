@@ -19,7 +19,7 @@ country <- "CHE"
 use_best_model <- TRUE
 
 # Load data.
-data <- fread("https://raw.githubusercontent.com/DeutscheAktuarvereinigung/Mortality_Modeling/master/mortality.csv")
+data <- fread("./data/mortality.csv")
 # Convert gender and country to factor variables.
 data$Gender <- as.factor(data$Gender)
 data$Country <- as.factor(data$Country)
@@ -87,8 +87,6 @@ if (use_best_model) {
                                          save_best_only = TRUE, save_weights_only = TRUE)
         callback_list <- c(callback_list, CBs)
 }
-
-
 
 # Fit model and measure time
 {current_time <- Sys.time()
