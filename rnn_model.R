@@ -5,10 +5,11 @@ library(keras)
 
 # import source codes
 source("data_preparation.R")
-source("create_lstm_model.R")
+source("create_model.R")
 source("shuffle_data.R")
 
 # Set parameters.
+model_type <- "GRU"
 timesteps <- 10
 age_range <- 5
 feature_dimension0 <- 20
@@ -41,7 +42,11 @@ average_label <- mean(y_train)
 
 unit_sizes <- c(feature_dimension0, feature_dimension1, feature_dimension2)
 
-model <- create_lstm_model(c(timesteps, age_range), unit_sizes, "tanh", "tanh", average_label)
+# Create the wanted model.
+if (model_type == "LSTM") {
+        model <- create_lstm_model(c(timesteps, age_range), unit_sizes, "tanh", "tanh", average_label)
+} else
+        model <- create_gru_model(c(timesteps, age_range), unit_sizes, "tanh", "tanh", average_label)
 summary(model)
 
 # Compile network.
@@ -55,7 +60,7 @@ lr_reducer <- callback_reduce_lr_on_plateau(monitor = "val_loss", factor = 0.1,
 callback_list <- list(lr_reducer)
 
 # Name model
-model_name <- paste0("LSTM", length(unit_sizes),"_", age_range, "_", feature_dimension0, "_",
+model_name <- paste0(model_type, length(unit_sizes),"_", age_range, "_", feature_dimension0, "_",
                     feature_dimension1, "_", feature_dimension2)
 #file.name <- paste("./Model_Full_Param/best_model_", name.model, sep="")
 file_name <- paste0("./CallBack/best_model_", model_name)
