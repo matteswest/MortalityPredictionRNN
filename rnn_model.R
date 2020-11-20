@@ -87,7 +87,7 @@ y_test_male <- x_test_male[which(x_test_male$Year > last_observed_year),]
 
 # Calculate in-sample loss
 if (use_best_model) load_model_weights_hdf5(model, file_name)
-mean((exp(as.vector(model %>% predict(x_train))) - exp(y_train))^2)
+mean((-as.vector(model %>% predict(x_train)) - (-y_train))^2)
 
 # calculating out-of-sample loss: LC is c(Female=0.6045, Male=1.8152)
 # Female
