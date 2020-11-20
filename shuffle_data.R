@@ -19,3 +19,5 @@ shuffle_data <- function(x_train, y_train) {
         list(list(new_x_train, new_gender_indicator), new_y_train)
 
 }
+
+###test
