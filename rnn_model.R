@@ -29,35 +29,8 @@ data$mortality <- exp(data$log_mortality)
 # Filter relevant countries.
 data <- data[which(data$Country %in% c("CHE", "DEUT", "DNK", "ESP", "FRATNP", "ITA", "JPN", "POL", "USA")),]
 
-# Split data into female and male.
-data_female <- data_preprocessing(data, "Female", country, timesteps, age_range, last_observed_year)
-data_male <- data_preprocessing(data, "Male", country, timesteps, age_range, last_observed_year)
-
-# Check if dimensions of male and female data match.
-if ( (dim(data_female[[1]])[1] != dim(data_male[[1]])[1]) | (dim(data_female[[2]])[1] != dim(data_male[[2]])[1]) )
-        stop("Shapes of female and male are not the same!")
-
-# Merge female and male data into one set.
-sample_size <- dim(data_female[[1]])[1]
-x_train <- array(NA, dim=c(2*sample_size, dim(data_female[[1]])[c(2,3)]))
-y_train <- array(NA, dim=c(2*sample_size))
-gender_indicator <- rep(c(0,1), sample_size)
-for (l in 1:sample_size){
-        x_train[(l-1)*2+1,,] <- data_female[[1]][l,,]
-        x_train[(l-1)*2+2,,] <- data_male[[1]][l,,]
-        # Invert label sign.
-        y_train[(l-1)*2+1] <- - data_female[[2]][l]
-        y_train[(l-1)*2+2] <- - data_male[[2]][l]
-}
-
-# MinMaxScaler data pre-processing.
-#x_min <- min(x_train)
-#x_max <- max(x_train)
-#x_train <- list(array(2*(x_train-x_min)/(x_min-x_max)-1, dim(x_train)), gender_indicator)
-x_train <- list(x_train, gender_indicator)
-
 # Shuffle the training data.
-combined_training_set <- shuffle_data(x_train, y_train)
+combined_training_set <- create_training_data(data, country, timesteps, age_range, last_observed_year)
 x_train <- combined_training_set[[1]]
 y_train <- combined_training_set[[2]]
 rm(combined_training_set)
@@ -101,12 +74,10 @@ if (use_best_model) {
 Sys.time() - current_time}
 plot(history)
 
-# Validation data pre-processing.
-data2_female <- data[which((data$Year > (last_observed_year - timesteps)) & (Gender == "Female") & (Country == country)),]
-x_test_female <- data2_female
+# Test data pre-processing.
+x_test_female <- data[which((data$Year > (last_observed_year - timesteps)) & (Gender == "Female") & (Country == country)),]
 y_test_female <- x_test_female[which(x_test_female$Year > last_observed_year),]
-data2_male <- data[which((data$Year > (last_observed_year-timesteps)) & (Gender == "Male") & (Country == country)),]
-x_test_male <- data2_male
+x_test_male <- data[which((data$Year > (last_observed_year-timesteps)) & (Gender == "Male") & (Country == country)),]
 y_test_male <- x_test_male[which(x_test_male$Year > last_observed_year),]
 
 # Calculate in-sample loss
@@ -115,18 +86,18 @@ mean((exp(as.vector(model %>% predict(x_train))) - exp(y_train))^2)
 
 # calculating out-of-sample loss: LC is c(Female=0.6045, Male=1.8152)
 # Female
-prediction_and_mse <- recursive_prediction(last_observed_year, data2_female, "Female", country, timesteps, age_range, model) #, x_min, x_max)
+prediction_and_mse <- recursive_prediction(last_observed_year, x_test_female, "Female", country, timesteps, age_range, model) #, x_min, x_max)
 # Filter the predicted mortality rates.
-prediction <- prediction_and_mse[[1]][which(data2_female$Year > last_observed_year),]
+prediction <- prediction_and_mse[[1]][which(x_test_female$Year > last_observed_year),]
 print("MSE female mortality: ")
 mean((prediction$mortality - y_test_female$mortality)^2)
 print("MSE female log_mortality: ")
 mean((prediction$log_mortality - y_test_female$log_mortality)^2)
 
 # Male
-prediction_and_mse <- recursive_prediction(last_observed_year, data2_male, "Male", country, timesteps, age_range, model) #, x_min, x_max)
+prediction_and_mse <- recursive_prediction(last_observed_year, x_test_male, "Male", country, timesteps, age_range, model) #, x_min, x_max)
 # Filter the predicted mortality rates.
-prediction <- prediction_and_mse[[1]][which(data2_male$Year > last_observed_year),]
+prediction <- prediction_and_mse[[1]][which(x_test_male$Year > last_observed_year),]
 print("MSE male mortality: ")
 mean((prediction$mortality - y_test_male$mortality)^2)
 print("MSE male log_mortality: ")
