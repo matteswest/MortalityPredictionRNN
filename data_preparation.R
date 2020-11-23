@@ -1,7 +1,7 @@
 # Functions for data preprocessing
 
 # function that outputs training data set ( x_(t,x), Y_(t,x) )
-data_preprocessing <- function(data.raw, gender, country, timesteps, feature_dimension, last_observed_years = 1999){ 
+data_preprocessing <- function(data.raw, gender, country, timesteps, feature_dimension, last_observed_years = 2005){ 
 
         mort_rates <- data.raw[which((data.raw$Gender == gender) & (data.raw$Country == country)), c("Year", "Age", "log_mortality")] 
         mort_rates <- dcast(mort_rates, Year ~ Age, value.var = "log_mortality")
@@ -32,7 +32,7 @@ data_preprocessing <- function(data.raw, gender, country, timesteps, feature_dim
 
 
 
-recursive_prediction <- function(last_observed_years, subdata, gender, country, timesteps, feature_dimension, model) {#, x_min, x_max){
+recursive_prediction <- function(last_observed_years, subdata, gender, country, timesteps, feature_dimension, x.min, x.max, model) {#, x_min, x_max){
 
         yearly_mse <- array(NA, c(2016 - last_observed_years))
 
@@ -41,8 +41,8 @@ recursive_prediction <- function(last_observed_years, subdata, gender, country, 
                 data_current_year <- data_preprocessing(subdata[which(subdata$Year >= (current_year - timesteps)),], gender, country, timesteps, feature_dimension, current_year)
 
                 # MinMaxScaler (with minimum and maximum from above)
-                #x_test <- array(2*(data_current_year[[1]]-x_min)/(x_min-x_max)-1, dim(data_current_year[[1]]))
-                x_test <- array(data_current_year[[1]], dim(data_current_year[[1]]))
+                x_test <- array(2*(data_current_year[[1]]-x.min)/(x.min-x.max)-1, dim(data_current_year[[1]]))
+                #x_test <- array(data_current_year[[1]], dim(data_current_year[[1]]))
 
                 if (gender == "Female")
                         gender_index <- 0
