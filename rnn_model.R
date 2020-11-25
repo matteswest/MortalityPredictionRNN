@@ -9,14 +9,14 @@ source("create_model.R")
 source("shuffle_data.R")
 
 # Set parameters.
-model_type <- "GRU"
+model_type <- "LSTM"
 timesteps <- 10
 age_range <- 5
 feature_dimension0 <- 20
 feature_dimension1 <- 15
 feature_dimension2 <- 10
 last_observed_year <- 1999
-country <- "CHE"
+countries <- c("CHE", "DEUT", "DNK", "ESP", "FRATNP", "ITA", "JPN", "POL", "USA")
 
 use_best_model <- TRUE
 
@@ -28,10 +28,10 @@ data$Country <- as.factor(data$Country)
 # Add column for mortality.
 data$mortality <- exp(data$log_mortality)
 # Filter relevant countries.
-data <- data[which(data$Country %in% c("CHE", "DEUT", "DNK", "ESP", "FRATNP", "ITA", "JPN", "POL", "USA")),]
+data <- data[which(data$Country %in% countries),]
 
 # Shuffle the training data.
-combined_training_set <- create_training_data(data, country, timesteps, age_range, last_observed_year)
+combined_training_set <- create_training_data(data, countries, timesteps, age_range, last_observed_year)
 x_train <- combined_training_set[[1]]
 y_train <- combined_training_set[[2]]
 rm(combined_training_set)
@@ -79,6 +79,7 @@ if (use_best_model) {
 Sys.time() - current_time}
 plot(history)
 
+country <- "CHE"
 # Test data pre-processing.
 x_test_female <- data[which((data$Year > (last_observed_year - timesteps)) & (Gender == "Female") & (Country == country)),]
 y_test_female <- x_test_female[which(x_test_female$Year > last_observed_year),]
