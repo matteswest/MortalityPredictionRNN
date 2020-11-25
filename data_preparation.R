@@ -1,7 +1,8 @@
 # Functions for data preprocessing
+source("shuffle_data.R")
 
 # function that outputs training data set ( x_(t,x), Y_(t,x) )
-data_preprocessing <- function(data.raw, gender, country, timesteps, feature_dimension, last_observed_years = 1999){ 
+data_preprocessing <- function(data.raw, gender, country, timesteps, feature_dimension, last_observed_years = 1999) { 
 
         mort_rates <- data.raw[which((data.raw$Gender == gender) & (data.raw$Country == country)), c("Year", "Age", "log_mortality")] 
         mort_rates <- dcast(mort_rates, Year ~ Age, value.var = "log_mortality")
@@ -27,6 +28,44 @@ data_preprocessing <- function(data.raw, gender, country, timesteps, feature_dim
                 }
         }
         list(xt.train, YT.train)
+
+}
+
+
+
+create_training_data <- function(data, country, timesteps, age_range, last_observed_year) {
+
+        # Split data into female and male.
+        data_female <- data_preprocessing(data, "Female", country, timesteps, age_range, last_observed_year)
+        data_male <- data_preprocessing(data, "Male", country, timesteps, age_range, last_observed_year)
+
+        # Check if dimensions of male and female data match.
+        if ( (dim(data_female[[1]])[1] != dim(data_male[[1]])[1]) | (dim(data_female[[2]])[1] != dim(data_male[[2]])[1]) )
+                stop("Shapes of female and male are not the same!")
+
+        # Merge female and male data into one set.
+        sample_size <- dim(data_female[[1]])[1]
+        x_train <- array(NA, dim=c(2*sample_size, dim(data_female[[1]])[c(2,3)]))
+        y_train <- array(NA, dim=c(2*sample_size))
+        gender_indicator <- rep(c(0,1), sample_size)
+        for (l in 1:sample_size){
+                x_train[(l-1)*2+1,,] <- data_female[[1]][l,,]
+                x_train[(l-1)*2+2,,] <- data_male[[1]][l,,]
+                # Invert label sign.
+                y_train[(l-1)*2+1] <- - data_female[[2]][l]
+                y_train[(l-1)*2+2] <- - data_male[[2]][l]
+        }
+
+        # MinMaxScaler data pre-processing.
+        #x_min <- min(x_train)
+        #x_max <- max(x_train)
+        #x_train <- list(array(2*(x_train-x_min)/(x_min-x_max)-1, dim(x_train)), gender_indicator)
+        x_train <- list(x_train, gender_indicator)
+
+        # Shuffle the training data.
+        combined_training_set <- shuffle_data(x_train, y_train)
+
+        combined_training_set
 
 }
 
