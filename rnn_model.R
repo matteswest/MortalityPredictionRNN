@@ -6,7 +6,7 @@ library(keras)
 # import source codes
 source("data_preparation.R")
 source("create_model.R")
-source("shuffle_data.R")
+source("out_of_sample_loss.R")
 
 # Set parameters.
 model_type <- "LSTM"
@@ -15,7 +15,7 @@ age_range <- 5
 feature_dimension0 <- 20
 feature_dimension1 <- 15
 feature_dimension2 <- 10
-last_observed_year <- 1999
+last_observed_year <- 2006
 countries <- c("CHE", "DEUT", "DNK", "ESP", "FRATNP", "ITA", "JPN", "POL", "USA")
 
 use_best_model <- TRUE
@@ -75,36 +75,12 @@ if (use_best_model) {
 
 # Fit model and measure time
 {current_time <- Sys.time()
-        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 250, verbose = 1, callbacks = callback_list)
+        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 100, verbose = 1, callbacks = callback_list)
 Sys.time() - current_time}
 plot(history)
 
-country <- "CHE"
-# Test data pre-processing.
-x_test_female <- data[which((data$Year > (last_observed_year - timesteps)) & (Gender == "Female") & (Country == country)),]
-y_test_female <- x_test_female[which(x_test_female$Year > last_observed_year),]
-x_test_male <- data[which((data$Year > (last_observed_year-timesteps)) & (Gender == "Male") & (Country == country)),]
-y_test_male <- x_test_male[which(x_test_male$Year > last_observed_year),]
+out_of_sample_loss(model, data, countries, timesteps, age_range, last_observed_year)
 
 # Calculate in-sample loss
-if (use_best_model) load_model_weights_hdf5(model, file_name)
-mean((-as.vector(model %>% predict(x_train)) - (-y_train))^2)
-
-# calculating out-of-sample loss: LC is c(Female=0.6045, Male=1.8152)
-# Female
-prediction_and_mse <- recursive_prediction(last_observed_year, x_test_female, "Female", country, timesteps, age_range, model) #, x_min, x_max)
-# Filter the predicted mortality rates.
-prediction <- prediction_and_mse[[1]][which(x_test_female$Year > last_observed_year),]
-print("MSE female mortality: ")
-mean((prediction$mortality - y_test_female$mortality)^2)
-print("MSE female log_mortality: ")
-mean((prediction$log_mortality - y_test_female$log_mortality)^2)
-
-# Male
-prediction_and_mse <- recursive_prediction(last_observed_year, x_test_male, "Male", country, timesteps, age_range, model) #, x_min, x_max)
-# Filter the predicted mortality rates.
-prediction <- prediction_and_mse[[1]][which(x_test_male$Year > last_observed_year),]
-print("MSE male mortality: ")
-mean((prediction$mortality - y_test_male$mortality)^2)
-print("MSE male log_mortality: ")
-mean((prediction$log_mortality - y_test_male$log_mortality)^2)
+#if (use_best_model) load_model_weights_hdf5(model, file_name)
+#mean((-as.vector(model %>% predict(x_train)) - (-y_train))^2)
