@@ -9,6 +9,7 @@ shuffle_data <- function(x_train, y_train) {
 
         index_list <- c(1:sample_size)
         # Shuffle index list.
+        set.seed(10)
         index_list <- sample(index_list)
 
         for (index in 1:sample_size) {

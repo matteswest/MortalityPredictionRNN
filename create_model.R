@@ -1,5 +1,7 @@
 library(keras)
 
+
+
 # The following function creates a LSTM model based on the given parameters:
 # - input_shape: (timesteps, feature_dimension).
 # - unit_sizes: number of units in a LSTM-layer, the length of unit_sizes corresponds to the 

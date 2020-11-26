@@ -2,6 +2,8 @@
 library(tidyverse)
 library(data.table)
 library(keras)
+library(tensorflow)
+use_session_with_seed(10, disable_gpu = TRUE, disable_parallel_cpu = FALSE, quiet = FALSE)
 
 # import source codes
 source("data_preparation.R")
