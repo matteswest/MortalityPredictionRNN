@@ -21,3 +21,18 @@ shuffle_data <- function(x_train, y_train) {
         list(list(new_x_train, new_gender_indicator, new_country_indicator), new_y_train)
 
 }
+
+
+
+get_country_index <- function(country, countries) {
+
+        country_index <- 0
+        for (current_country in countries) {
+                if (country == current_country) {
+                        return(country_index)
+                        break
+                }
+                country_index <- country_index + 1
+        }
+
+}
