@@ -77,12 +77,13 @@ if (use_best_model) {
 
 # Fit model and measure time
 {current_time <- Sys.time()
-        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 100, verbose = 1, callbacks = callback_list)
+        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 5, verbose = 1, callbacks = callback_list)
 Sys.time() - current_time}
-plot(history)
+plot_loss(model_name, history[[2]]$val_loss, history[[2]]$loss)
+
+if (use_best_model) load_model_weights_hdf5(model, file_name)
 
 out_of_sample_loss(model, data, countries, timesteps, age_range, last_observed_year)
 
 # Calculate in-sample loss
-#if (use_best_model) load_model_weights_hdf5(model, file_name)
 #mean((-as.vector(model %>% predict(x_train)) - (-y_train))^2)

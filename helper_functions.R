@@ -37,3 +37,13 @@ get_country_index <- function(country, countries) {
         }
 
 }
+
+
+
+plot_loss <- function(model_name, val_loss, loss) {
+
+        plot(val_loss, type = "l", lwd = 2, col = "red", main = paste(model_name), xlab = "epochs", ylab = "MSE", log = "y")
+        lines(loss, type = "l", col = "blue", lwd = 2)
+        legend(x = "bottomleft", legend = c("validation loss", "loss"), lwd = c(2, 2), col = c("red", "blue"))
+
+}
