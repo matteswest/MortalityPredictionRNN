@@ -46,9 +46,9 @@ unit_sizes <- c(feature_dimension0, feature_dimension1, feature_dimension2)
 
 # Create the wanted model.
 if (model_type == "LSTM") {
-        model <- create_lstm_model(c(timesteps, age_range), unit_sizes, "tanh", "tanh", average_label)
+        model <- create_lstm_model(c(timesteps, age_range), unit_sizes, "tanh", "sigmoid", average_label)
 } else
-        model <- create_gru_model(c(timesteps, age_range), unit_sizes, "tanh", "tanh", average_label)
+        model <- create_gru_model(c(timesteps, age_range), unit_sizes, "tanh", "sigmoid", average_label)
 summary(model)
 
 # Compile network.
@@ -70,14 +70,14 @@ file_name <- paste0("./CallBack/best_model_", model_name)
 # define Callback to save best model w.r.t. loss value (mse)
 CBs <- NULL
 if (use_best_model) {
-        CBs <- callback_model_checkpoint(file_name, monitor = "val_loss", verbose = 0,
+        CBs <- callback_model_checkpoint(file_name, monitor = "val_loss", verbose = 1,
                                          save_best_only = TRUE, save_weights_only = TRUE)
         callback_list <- c(callback_list, CBs)
 }
 
 # Fit model and measure time
 {current_time <- Sys.time()
-        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 5, verbose = 1, callbacks = callback_list)
+        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 100, verbose = 1, callbacks = callback_list)
 Sys.time() - current_time}
 plot_loss(model_name, history[[2]]$val_loss, history[[2]]$loss)
 

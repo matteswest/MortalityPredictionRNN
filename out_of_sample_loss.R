@@ -53,7 +53,7 @@ recursive_prediction <- function(last_observed_years, subdata, gender, countries
 out_of_sample_loss <- function(model, data, countries, timesteps, age_range, last_observed_year) {
 
         table <- matrix(0, length(countries) * 2, 2)
-        colnames(table) <- c("MSE ( * 10^4 )", "log MSE")
+        colnames(table) <- c("MSE", "log MSE")
         row_names <- c()
         for(country in countries) {
                 row_names <- c(row_names, paste(country, "Female", sep = " "))
@@ -74,14 +74,14 @@ out_of_sample_loss <- function(model, data, countries, timesteps, age_range, las
                 prediction_and_mse <- recursive_prediction(last_observed_year, x_test_female, "Female", countries, country, timesteps, age_range, model) #, x_min, x_max)
                 # Filter the predicted mortality rates.
                 prediction <- prediction_and_mse[[1]][which(x_test_female$Year > last_observed_year),]
-                table[2*country_index + 1, 1] <- 10^4 * mean((prediction$mortality - y_test_female$mortality)^2)
+                table[2*country_index + 1, 1] <- mean((prediction$mortality - y_test_female$mortality)^2)
                 table[2*country_index + 1, 2] <- mean((prediction$log_mortality - y_test_female$log_mortality)^2)
 
                 # Male
                 prediction_and_mse <- recursive_prediction(last_observed_year, x_test_male, "Male", countries, country, timesteps, age_range, model) #, x_min, x_max)
                 # Filter the predicted mortality rates.
                 prediction <- prediction_and_mse[[1]][which(x_test_male$Year > last_observed_year),]
-                table[2*country_index + 2, 1] <- 10^4 * mean((prediction$mortality - y_test_male$mortality)^2)
+                table[2*country_index + 2, 1] <- mean((prediction$mortality - y_test_male$mortality)^2)
                 table[2*country_index + 2, 2] <- mean((prediction$log_mortality - y_test_male$log_mortality)^2)
         }
 

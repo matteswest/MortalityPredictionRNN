@@ -30,9 +30,9 @@ create_lstm_model <- function(input_shape, unit_sizes, activation, recurrent_act
         #current_output <- layer_batch_normalization()(current_output)
 
         # Concatenate LSTM result and gender indicator.
-        concatenated_tensor <- layer_concatenate(list(current_output, input_gender))
-        concatenated_tensor <- layer_concatenate(list(concatenated_tensor, input_country))
-        output <- layer_dense(units = 1, activation = k_exp, weights = list(array(0, dim = c(unit_sizes[length(unit_sizes)] + 2, 1)), array(log(average_label) ,dim = c(1))))(concatenated_tensor)
+        current_output <- layer_concatenate(list(current_output, input_gender))
+        current_output <- layer_concatenate(list(current_output, input_country))
+        output <- layer_dense(units = 1, activation = k_exp, weights = list(array(0, dim = c(unit_sizes[length(unit_sizes)] + 2, 1)), array(log(average_label) ,dim = c(1))))(current_output)
 
         model <- keras_model(inputs = list(input, input_gender, input_country), outputs = c(output))
 
@@ -68,9 +68,9 @@ create_gru_model <- function(input_shape, unit_sizes, activation, recurrent_acti
         #current_output <- layer_batch_normalization()(current_output)
 
         # Concatenate LSTM result and gender indicator.
-        concatenated_tensor <- layer_concatenate(list(current_output, input_gender))
-        concatenated_tensor <- layer_concatenate(list(concatenated_tensor, input_country))
-        output <- layer_dense(units = 1, activation = k_exp, weights = list(array(0, dim = c(unit_sizes[length(unit_sizes)] + 2, 1)), array(log(average_label) ,dim = c(1))))(concatenated_tensor)
+        current_output <- layer_concatenate(list(current_output, input_gender))
+        current_output <- layer_concatenate(list(current_output, input_country))
+        output <- layer_dense(units = 1, activation = k_exp, weights = list(array(0, dim = c(unit_sizes[length(unit_sizes)] + 2, 1)), array(log(average_label) ,dim = c(1))))(current_output)
 
         model <- keras_model(inputs = list(input, input_gender, input_country), outputs = c(output))
 
