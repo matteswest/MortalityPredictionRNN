@@ -2,6 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-.rds
+*.rds
 MortalityPredictionRNN.Rproj
 CallBack
