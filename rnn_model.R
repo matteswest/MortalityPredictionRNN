@@ -10,13 +10,15 @@ source("data_preparation.R")
 source("create_model.R")
 source("out_of_sample_loss.R")
 
-# Set parameters.
+# Set variable parameters.
 model_type <- "LSTM"
 timesteps <- 10
 age_range <- 5
 feature_dimension0 <- 20
 feature_dimension1 <- 15
 feature_dimension2 <- 10
+
+# fixed parameters
 last_observed_year <- 2006
 countries <- c("CHE", "DEUT", "DNK", "ESP", "FRATNP", "ITA", "JPN", "POL", "USA")
 
