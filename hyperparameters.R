@@ -2,9 +2,9 @@
 # and specifies the flags for the construction of various models from which we want to choose 
 # the best performing one.
 
-# Import libraries
-#library(keras)
-#library(data.table)
+# Import tensorflow and set seed
+library(tensorflow)
+use_session_with_seed(10, disable_gpu = TRUE, disable_parallel_cpu = FALSE, quiet = FALSE)
 
 source("create_model.R")
 
