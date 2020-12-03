@@ -1,6 +1,10 @@
 # This R Script serves as Input for the 'tuning_run()'-function which is called in rnn_model.R
 # and specifies the flags for the construction of various models from which we want to choose 
 # the best performing one.
+library(keras)
+library(tensorflow)
+tensorflow::tf$random$set_seed(10)
+#use_session_with_seed(10, disable_gpu = TRUE, disable_parallel_cpu = FALSE, quiet = FALSE)
 
 source("create_model.R")
 
