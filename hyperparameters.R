@@ -2,10 +2,6 @@
 # and specifies the flags for the construction of various models from which we want to choose 
 # the best performing one.
 
-# Import tensorflow and set seed
-library(tensorflow)
-use_session_with_seed(10, disable_gpu = TRUE, disable_parallel_cpu = FALSE, quiet = FALSE)
-
 source("create_model.R")
 
 print(getwd())
@@ -69,6 +65,6 @@ use_best_model <- callback_model_checkpoint("best_model.h5", monitor = "val_loss
                                             save_best_only = TRUE, save_weights_only = FALSE)
 
 # fit model
-history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.1, batch_size = FLAGS$batch_size, epochs = 20, verbose = 1,
+history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.1, batch_size = FLAGS$batch_size, epochs = 200, verbose = 1,
                          callbacks = list(early_stop, lr_reducer, use_best_model))
 
