@@ -26,7 +26,8 @@ FLAGS <- flags(
         #flag_integer('pats', 20),
         flag_integer('batch_size', 100), # maybe higher?
         flag_string('activation', 'tanh'),
-        flag_string('recurrent_activation', 'tanh')
+        flag_string('recurrent_activation', 'tanh'),
+        flag_string("output_activation", "exponential")
 )
 
 # Data Preparation
@@ -47,9 +48,9 @@ unit_sizes <- unit_sizes[1:FLAGS$layers]
 
 # Create the wanted model.
 if (FLAGS$model_type == "LSTM") {
-        model <- create_lstm_model(c(FLAGS$timesteps, FLAGS$age_range), unit_sizes, FLAGS$activation, FLAGS$recurrent_activation, average_label)
+        model <- create_lstm_model(c(FLAGS$timesteps, FLAGS$age_range), unit_sizes, FLAGS$activation, FLAGS$recurrent_activation, FLAGS$output_activation, average_label)
 } else
-        model <- create_gru_model(c(FLAGS$timesteps, FLAGS$age_range), unit_sizes, FLAGS$activation, FLAGS$recurrent_activation, average_label)
+        model <- create_gru_model(c(FLAGS$timesteps, FLAGS$age_range), unit_sizes, FLAGS$activation, FLAGS$recurrent_activation, FLAGS$output_activation, average_label)
 
 
 # compile model

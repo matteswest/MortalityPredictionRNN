@@ -7,7 +7,7 @@ library(keras)
 # - unit_sizes: number of units in a LSTM-layer, the length of unit_sizes corresponds to the 
 #               number of LSTM-layers.
 # - average_label: is used as an initialization for the weight in the last dense layer for faster convergence.
-create_lstm_model <- function(input_shape, unit_sizes, activation, recurrent_activation, average_label) {
+create_lstm_model <- function(input_shape, unit_sizes, activation, recurrent_activation, output_activation, average_label) {
 
         input <- layer_input(shape = input_shape, dtype = "float32")
         input_gender <- layer_input(shape = c(1), dtype = "float32")
@@ -32,7 +32,9 @@ create_lstm_model <- function(input_shape, unit_sizes, activation, recurrent_act
         # Concatenate LSTM result and gender indicator.
         current_output <- layer_concatenate(list(current_output, input_gender))
         current_output <- layer_concatenate(list(current_output, input_country))
-        output <- layer_dense(units = 1, activation = "exponential", weights = list(array(0, dim = c(unit_sizes[length(unit_sizes)] + 2, 1)), array(log(average_label) ,dim = c(1))))(current_output)
+        if (output_activation == "NULL")
+                output_activation <- NULL
+        output <- layer_dense(units = 1, activation = output_activation, weights = list(array(0, dim = c(unit_sizes[length(unit_sizes)] + 2, 1)), array(log(average_label) ,dim = c(1))))(current_output)
 
         model <- keras_model(inputs = list(input, input_gender, input_country), outputs = c(output))
 
@@ -45,7 +47,7 @@ create_lstm_model <- function(input_shape, unit_sizes, activation, recurrent_act
 # - unit_sizes: number of units in a GRU-layer, the length of unit_sizes corresponds to the 
 #               number of GRU-layers.
 # - average_label: is used as an initialization for the weight in the last dense layer for faster convergence.
-create_gru_model <- function(input_shape, unit_sizes, activation, recurrent_activation, average_label) {
+create_gru_model <- function(input_shape, unit_sizes, activation, recurrent_activation, output_activation, average_label) {
 
         input <- layer_input(shape = input_shape, dtype = "float32")
         input_gender <- layer_input(shape = c(1), dtype = "float32")
@@ -70,7 +72,9 @@ create_gru_model <- function(input_shape, unit_sizes, activation, recurrent_acti
         # Concatenate LSTM result and gender indicator.
         current_output <- layer_concatenate(list(current_output, input_gender))
         current_output <- layer_concatenate(list(current_output, input_country))
-        output <- layer_dense(units = 1, activation = "exponential", weights = list(array(0, dim = c(unit_sizes[length(unit_sizes)] + 2, 1)), array(log(average_label) ,dim = c(1))))(current_output)
+        if (output_activation == "NULL")
+                output_activation <- NULL
+        output <- layer_dense(units = 1, activation = output_activation, weights = list(array(0, dim = c(unit_sizes[length(unit_sizes)] + 2, 1)), array(log(average_label) ,dim = c(1))))(current_output)
 
         model <- keras_model(inputs = list(input, input_gender, input_country), outputs = c(output))
 
