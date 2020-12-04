@@ -2,5 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
+*.rds
+*.h5
+grid_search/
 MortalityPredictionRNN.Rproj
 CallBack
+data/results.xlsx
