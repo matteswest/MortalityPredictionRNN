@@ -15,18 +15,18 @@ countries <- c("CHE", "DEUT", "DNK", "ESP", "FRATNP", "ITA", "JPN", "POL", "USA"
 set.seed(10)
 parameters <- list(
         model_type = c("LSTM"),
-        timesteps = c(3),#, 10, 15),
-        age_range = c(7),
-        layers = c(3),
-        feature_dimension0 = c(20),
-        feature_dimension1 = c(15),
-        feature_dimension2 = c(10),
-        feature_dimension3 = c(5),
-        #feature_dimension4 = c(5, 10),
-        batch_size = c(100),
+        timesteps = c(5, 10),#, 10, 15),
+        age_range = c(5,7,9),
+        layers = c(2,3,4,5),
+        feature_dimension0 = c(20, 30, 40),
+        feature_dimension1 = c(15, 20, 25),
+        feature_dimension2 = c(10, 15, 20),
+        feature_dimension3 = c(5, 10, 15),
+        feature_dimension4 = c(2, 4, 6),
+        batch_size = c(100, 200, 400),
         activation = c("tanh"),
-        recurrent_activation = c("tanh"),
-        output_activation = c("NULL")
+        recurrent_activation = c("tanh", "hard_sigmoid"),
+        output_activation = c("exponential", "NULL")
 )
 
 # Create all combinations of training data
