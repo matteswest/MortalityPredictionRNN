@@ -19,14 +19,14 @@ parameters <- list(
         age_range = c(5,7,9),
         layers = c(2,3,4,5),
         feature_dimension0 = c(20, 30, 40),
-        feature_dimension1 = c(15, 20, 25),
-        feature_dimension2 = c(10, 15, 20),
-        feature_dimension3 = c(5, 10, 15),
-        feature_dimension4 = c(2, 4, 6),
+        feature_dimension1 = c(15, 20),
+        feature_dimension2 = c(10, 15),
+        feature_dimension3 = c(5, 10),
+        feature_dimension4 = c(2, 4),
         batch_size = c(100, 200, 400),
         activation = c("tanh"),
-        recurrent_activation = c("tanh", "hard_sigmoid"),
-        output_activation = c("exponential", "NULL")
+        recurrent_activation = c("tanh"),
+        output_activation = c("exponential")
 )
 
 # Create all combinations of training data
@@ -64,4 +64,4 @@ if (file.exists("./grid_search")){
         unlink("./grid_search", recursive = TRUE)
 }
 
-runs <- tuning_run('hyperparameters.R', runs_dir = 'grid_search', sample = 1.0, flags = parameters)
+runs <- tuning_run('hyperparameters.R', runs_dir = 'grid_search', sample = 0.0125, flags = parameters)

@@ -20,6 +20,7 @@ FLAGS <- flags(
         flag_integer('feature_dimension1', 15),
         flag_integer('feature_dimension2', 10),
         flag_integer('feature_dimension3', 5),
+        flag_integer('feature_dimension4', 2),
         #flag_numeric('dropout', 0.05),
         #flag_numeric('lr', 0.01),
         #flag_integer('patience', 35),
@@ -43,7 +44,7 @@ average_label <- mean(y_train)
 
 
 # construct unit sizes vector
-unit_sizes <- c(FLAGS$feature_dimension0, FLAGS$feature_dimension1, FLAGS$feature_dimension2, FLAGS$feature_dimension3)
+unit_sizes <- c(FLAGS$feature_dimension0, FLAGS$feature_dimension1, FLAGS$feature_dimension2, FLAGS$feature_dimension3, FLAGS$feature_dimension4)
 unit_sizes <- unit_sizes[1:FLAGS$layers]
 
 # Create the wanted model.
