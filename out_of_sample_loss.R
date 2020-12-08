@@ -5,8 +5,8 @@ source("helper_functions.R")
 
 recursive_prediction <- function(last_observed_years, subdata, gender, countries, country, timesteps, feature_dimension, model) {#, x_min, x_max){
 
-        # Since the range of the years between the countries differ, we have to compute the last real obsevered year.
-        last_year <- range(data$Year[which(data$Country == country)])[2]
+        # Since the range of the years between the countries differ, we have to compute the last real observed year.
+        last_year <- range(subdata$Year[which(data$Country == country)])[2]
 
         yearly_mse <- array(NA, c(last_year - last_observed_years))
 
