@@ -29,11 +29,11 @@ results <- select(results, -c(output))
 writexl::write_xlsx(results, "./data/results.xlsx")
 
 # Load best model.
-path <- paste0("./", results[43,1], "/best_model.h5")
+path <- paste0("./", results[1,1], "/best_model.h5")
 model <- load_model_hdf5(path)
 summary(model)
 
-out_of_sample_loss(model, data, countries, results[43,8], results[43,9], last_observed_year)
+out_of_sample_loss(model, data, countries, results[1,8], results[1,9], last_observed_year)
 # models to consider: 3, 5, 7
 
 
