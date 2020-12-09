@@ -79,7 +79,7 @@ if (use_best_model) {
 
 # Fit model and measure time
 {current_time <- Sys.time()
-        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.2, batch_size = 100, epochs = 10, verbose = 1, callbacks = callback_list)
+        history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.1, batch_size = 100, epochs = 100, verbose = 1, callbacks = callback_list)
 Sys.time() - current_time}
 plot_loss(model_name, history[[2]]$val_loss, history[[2]]$loss)
 
