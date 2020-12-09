@@ -8,8 +8,6 @@ tensorflow::tf$random$set_seed(10)
 
 source("create_model.R")
 
-print(getwd())
-
 
 FLAGS <- flags(
         flag_string('model_type', 'LSTM'),
