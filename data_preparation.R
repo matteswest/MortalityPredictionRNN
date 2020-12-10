@@ -79,8 +79,8 @@ create_training_data <- function(data, countries, timesteps, age_range, last_obs
         x_train <- list(x_train, gender_indicator, country_indicator)
 
         # Shuffle the training data.
-        combined_training_set <- shuffle_data(x_train, y_train)
-
+        #combined_training_set <- shuffle_data(x_train, y_train)
+        combined_training_set <- list(x_train, y_train)
         combined_training_set
 
 }

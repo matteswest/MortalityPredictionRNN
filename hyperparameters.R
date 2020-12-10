@@ -8,8 +8,6 @@ tensorflow::tf$random$set_seed(10)
 
 source("create_model.R")
 
-print(getwd())
-
 
 FLAGS <- flags(
         flag_string('model_type', 'LSTM'),
@@ -20,13 +18,15 @@ FLAGS <- flags(
         flag_integer('feature_dimension1', 15),
         flag_integer('feature_dimension2', 10),
         flag_integer('feature_dimension3', 5),
+        flag_integer('feature_dimension4', 2),
         #flag_numeric('dropout', 0.05),
         #flag_numeric('lr', 0.01),
         #flag_integer('patience', 35),
         #flag_integer('pats', 20),
         flag_integer('batch_size', 100), # maybe higher?
         flag_string('activation', 'tanh'),
-        flag_string('recurrent_activation', 'tanh')
+        flag_string('recurrent_activation', 'tanh'),
+        flag_string("output_activation", "exponential")
 )
 
 # Data Preparation
@@ -42,14 +42,14 @@ average_label <- mean(y_train)
 
 
 # construct unit sizes vector
-unit_sizes <- c(FLAGS$feature_dimension0, FLAGS$feature_dimension1, FLAGS$feature_dimension2, FLAGS$feature_dimension3)
+unit_sizes <- c(FLAGS$feature_dimension0, FLAGS$feature_dimension1, FLAGS$feature_dimension2, FLAGS$feature_dimension3, FLAGS$feature_dimension4)
 unit_sizes <- unit_sizes[1:FLAGS$layers]
 
 # Create the wanted model.
 if (FLAGS$model_type == "LSTM") {
-        model <- create_lstm_model(c(FLAGS$timesteps, FLAGS$age_range), unit_sizes, FLAGS$activation, FLAGS$recurrent_activation, average_label)
+        model <- create_lstm_model(c(FLAGS$timesteps, FLAGS$age_range), unit_sizes, FLAGS$activation, FLAGS$recurrent_activation, FLAGS$output_activation, average_label)
 } else
-        model <- create_gru_model(c(FLAGS$timesteps, FLAGS$age_range), unit_sizes, FLAGS$activation, FLAGS$recurrent_activation, average_label)
+        model <- create_gru_model(c(FLAGS$timesteps, FLAGS$age_range), unit_sizes, FLAGS$activation, FLAGS$recurrent_activation, FLAGS$output_activation, average_label)
 
 
 # compile model
