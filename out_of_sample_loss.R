@@ -11,6 +11,14 @@ recursive_prediction <- function(last_observed_years, subdata, gender, countries
         yearly_mse <- array(NA, c(last_year - last_observed_years))
 
         for (current_year in ((last_observed_years+1):(last_year + number_of_projected_years))){
+
+                # If mortality rates are projected the table does not include a row for the current year, so this row has to be added to the data table.
+                if (current_year > last_year) {
+                        new_row <- subdata[which(subdata$Year == (current_year - 1))]
+                        new_row$Year <- current_year
+                        subdata <- rbind(subdata, new_row)
+                }
+
                 # Select only the necessary for the current year.
                 data_current_year <- data_preprocessing(subdata[which(subdata$Year >= (current_year - timesteps)),], gender, country, timesteps, feature_dimension, current_year)
 
@@ -33,21 +41,12 @@ recursive_prediction <- function(last_observed_years, subdata, gender, countries
                 y_hat <- - as.vector(model %>% predict(x_test))
 
                 # Replace the known log mortalities with the predicted ones.
-                if (current_year <= last_year) {
-                        predicted <- subdata[which(subdata$Year == current_year),]
-                        keep <- subdata[which(subdata$Year != current_year),]
-                        predicted$log_mortality <- y_hat
-                        predicted$mortality <- exp(predicted$log_mortality)
-                        subdata <- rbind(keep, predicted)
-                        subdata <- subdata[order(Gender, Year, Age),]
-                } else {
-                        projected <- subdata[which(subdata$Year == (current_year - 1))]
-                        projected$Year <- current_year
-                        projected$log_mortality <- y_hat
-                        projected$mortality <- exp(projected$log_mortality)
-                        subdata <- rbind(subdata, projected)
-                        subdata <- subdata[order(Gender, Year, Age),]
-                }
+                predicted <- subdata[which(subdata$Year == current_year),]
+                keep <- subdata[which(subdata$Year != current_year),]
+                predicted$log_mortality <- y_hat
+                predicted$mortality <- exp(predicted$log_mortality)
+                subdata <- rbind(keep, predicted)
+                subdata <- subdata[order(Gender, Year, Age),]
         }
 
         list(subdata)
