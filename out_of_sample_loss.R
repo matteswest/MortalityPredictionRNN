@@ -99,8 +99,8 @@ out_of_sample_loss <- function(model, data, countries, timesteps, age_range, las
 
 project_future_rates <- function(model, data, countries, timesteps, age_range, last_observed_year, number_of_projected_years) {
 
-        country_projections <- c()
-
+        country_projections <- vector("list", length(countries))
+        list_index <- 1
         for (country in countries) {
                 x_test_female <- data[which((data$Year > (last_observed_year - timesteps)) & (Gender == "Female") & (Country == country)),]
                 y_test_female <- x_test_female[which(x_test_female$Year > last_observed_year),]
@@ -108,10 +108,14 @@ project_future_rates <- function(model, data, countries, timesteps, age_range, l
                 y_test_male <- x_test_male[which(x_test_male$Year > last_observed_year),]
 
                 # Female
-                recursive_pred_female <- recursive_prediction(last_observed_year, x_test_female, "Female", countries, country, timesteps, age_range, model) #, x_min, x_max)
+                recursive_pred_female <- recursive_prediction(last_observed_year, x_test_female, "Female", countries, country, timesteps, age_range, model, number_of_projected_years) #, x_min, x_max)
                 # Male
-                recursive_pred_male <- recursive_prediction(last_observed_year, x_test_male, "Male", countries, country, timesteps, age_range, model) #, x_min, x_max)
-                country_projections <- c(country_projections, c(recursive_pred_female[[1]], recursive_pred_male[[1]]))
+                recursive_pred_male <- recursive_prediction(last_observed_year, x_test_male, "Male", countries, country, timesteps, age_range, model, number_of_projected_years) #, x_min, x_max)
+                
+                country_projections[[list_index]] <- list("Country" = country, "Female_Pred" = recursive_pred_female[[1]],
+                                                          "Male_Pred" = recursive_pred_male[[1]])
+                
+                list_index <- list_index + 1
         }
 
         return(country_projections)

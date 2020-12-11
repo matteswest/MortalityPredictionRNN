@@ -9,7 +9,7 @@ library(data.table)
 source("out_of_sample_loss.R")
 source("create_model.R")
 
-use_kaggle <- TRUE
+use_kaggle <- FALSE
 
 # fixed parameters
 last_observed_year <- 2006
@@ -51,4 +51,18 @@ if (use_kaggle) {
 writexl::write_xlsx(results, "./data/results.xlsx")
 
 out_of_sample_loss(model, data, countries, results[1,8], results[1,9], last_observed_year)
-# models to consider: 3, 5, 7
+
+# Project mortality rates
+future_rates <- project_future_rates(model, data, countries, results[1,8], results[1,9], last_observed_year, 30)
+str(future_rates)
+
+future_rates_DEUT <- future_rates[[get_country_index("DEUT", countries)]]$Female_Pred
+
+library(ggplot2)
+plot_DEUT_Female <- ggplot(data = future_rates_DEUT[which(future_rates_DEUT$Year %in% c(2006, 2016, 2036))]) +
+        geom_point(data = data[which(data$Year==2006)], aes(x = Age, y = mortality, color = "Year 2006")) +
+        geom_point(data = data[which(data$Year == 2016)], aes(x = Age, y = mortality, color = "Year 2016")) +
+        geom_point(data = data[which(data$Year == 2036)], aes(x = Age, y = mortality, color = "Year 2036"))
+
+plot_DEUT_Female
+

@@ -2,14 +2,22 @@
 source("helper_functions.R")
 
 # function that outputs training data set ( x_(t,x), Y_(t,x) )
-data_preprocessing <- function(data, gender, country, timesteps, feature_dimension, last_observed_years = 1999) { 
+data_preprocessing <- function(data, gender, country, timesteps, age_range, last_observed_years = 1999) { 
 
         mort_rates <- data[which((data$Gender == gender) & (data$Country == country)), c("Year", "Age", "log_mortality")] 
         mort_rates <- dcast(mort_rates, Year ~ Age, value.var = "log_mortality")
+        if (last_observed_years > 2016){
+                print("Str Mort_Rates:")
+                print(last_observed_years)
+                #print(str(mort_rates))
+                #print(str(mort_rates[which(mort_rates$Year <= last_observed_years),]))
+                print(mort_rates[which(mort_rates$Year == last_observed_years - 1)])
+        }
+        
         # selecting data
         train_rates <- as.matrix(mort_rates[which(mort_rates$Year <= last_observed_years),])
         # adding padding at the border
-        (delta0 <- (feature_dimension-1)/2)
+        (delta0 <- (age_range-1)/2)
         if (delta0>0){
                 for (i in 1:delta0){
                         train_rates <- as.matrix(cbind(train_rates[,1], train_rates[,2], train_rates[,-1], train_rates[,ncol(train_rates)]))
@@ -17,13 +25,21 @@ data_preprocessing <- function(data, gender, country, timesteps, feature_dimensi
         }
         train_rates <- train_rates[,-1]
         (n_years <- nrow(train_rates)-(timesteps-1)-1)
-        (n_ages <- ncol(train_rates)-(feature_dimension-1)) 
+        (n_ages <- ncol(train_rates)-(age_range-1)) 
         (n_train <- n_years * n_ages) # number of training samples
-        xt_train <- array(NA, c(n_train, timesteps, feature_dimension))
+        xt_train <- array(NA, c(n_train, timesteps, age_range))
         yt_train <- array(NA, c(n_train))
+        
+        if (last_observed_years > 2015){
+                print("Dimensions:")
+                print(dim(train_rates))
+                print(paste0("n_years:", n_years, " n_ages:", n_ages, " n_train:", n_train))
+        }
+        
+        
         for (t0 in (1:n_years)){
                 for (a0 in (1:n_ages)){
-                        xt_train[(t0-1)*n_ages+a0,,] <- train_rates[t0:(t0 + timesteps - 1), a0:(a0+feature_dimension-1)]
+                        xt_train[(t0-1)*n_ages+a0,,] <- train_rates[t0:(t0 + timesteps - 1), a0:(a0+age_range-1)]
                         yt_train[(t0-1)*n_ages+a0] <- train_rates[t0 + timesteps, a0+delta0]
                 }
         }
