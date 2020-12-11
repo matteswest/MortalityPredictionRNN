@@ -2,9 +2,9 @@
 source("helper_functions.R")
 
 # function that outputs training data set ( x_(t,x), Y_(t,x) )
-data_preprocessing <- function(data.raw, gender, country, timesteps, feature_dimension, last_observed_years = 1999) { 
+data_preprocessing <- function(data, gender, country, timesteps, feature_dimension, last_observed_years = 1999) { 
 
-        mort_rates <- data.raw[which((data.raw$Gender == gender) & (data.raw$Country == country)), c("Year", "Age", "log_mortality")] 
+        mort_rates <- data[which((data$Gender == gender) & (data$Country == country)), c("Year", "Age", "log_mortality")] 
         mort_rates <- dcast(mort_rates, Year ~ Age, value.var = "log_mortality")
         # selecting data
         train_rates <- as.matrix(mort_rates[which(mort_rates$Year <= last_observed_years),])
@@ -16,18 +16,18 @@ data_preprocessing <- function(data.raw, gender, country, timesteps, feature_dim
                 }
         }
         train_rates <- train_rates[,-1]
-        (t1 <- nrow(train_rates)-(timesteps-1)-1)
-        (a1 <- ncol(train_rates)-(feature_dimension-1)) 
-        (n.train <- t1 * a1) # number of training samples
-        xt.train <- array(NA, c(n.train, timesteps, feature_dimension))
-        YT.train <- array(NA, c(n.train))
-        for (t0 in (1:t1)){
-                for (a0 in (1:a1)){
-                        xt.train[(t0-1)*a1+a0,,] <- train_rates[t0:(t0 + timesteps - 1), a0:(a0+feature_dimension-1)]
-                        YT.train[(t0-1)*a1+a0] <- train_rates[t0 + timesteps, a0+delta0]
+        (n_years <- nrow(train_rates)-(timesteps-1)-1)
+        (n_ages <- ncol(train_rates)-(feature_dimension-1)) 
+        (n_train <- n_years * n_ages) # number of training samples
+        xt_train <- array(NA, c(n_train, timesteps, feature_dimension))
+        yt_train <- array(NA, c(n_train))
+        for (t0 in (1:n_years)){
+                for (a0 in (1:n_ages)){
+                        xt_train[(t0-1)*n_ages+a0,,] <- train_rates[t0:(t0 + timesteps - 1), a0:(a0+feature_dimension-1)]
+                        yt_train[(t0-1)*n_ages+a0] <- train_rates[t0 + timesteps, a0+delta0]
                 }
         }
-        list(xt.train, YT.train)
+        list(xt_train, yt_train)
 
 }
 
