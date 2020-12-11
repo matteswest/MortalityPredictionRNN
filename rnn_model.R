@@ -67,7 +67,7 @@ callback_list <- list(lr_reducer)
 model_name <- paste0(model_type, length(unit_sizes),"_", age_range, "_", feature_dimension0, "_",
                     feature_dimension1, "_", feature_dimension2)
 #file.name <- paste("./Model_Full_Param/best_model_", name.model, sep="")
-file_name <- paste0("./CallBack/best_model_", model_name)
+file_name <- paste0("./CallBack/best_model_", model_name, ".h5")
 
 # define Callback to save best model w.r.t. loss value (mse)
 CBs <- NULL
@@ -89,3 +89,25 @@ out_of_sample_loss(model, data, countries, timesteps, age_range, last_observed_y
 
 # Calculate in-sample loss
 #mean((-as.vector(model %>% predict(x_train)) - (-y_train))^2)
+future_rates <- project_future_rates(model, data, countries, timesteps, age_range, last_observed_year, 40)
+future_rates_DEUT_female <- future_rates[[get_country_index("DEUT", countries) + 1]]$Female_Pred
+future_rates_DEUT_male <- future_rates[[get_country_index("DEUT", countries) + 1]]$Male_Pred
+
+plot_DEUT_Female <- ggplot() +
+        ggtitle("DEUT Female") +
+        geom_point(data = future_rates_DEUT_female[which(future_rates_DEUT_female$Year == 2006)], aes(x = Age, y = log_mortality, color = "Year 2006")) +
+        geom_point(data = future_rates_DEUT_female[which(future_rates_DEUT_female$Year == 2016)], aes(x = Age, y = log_mortality, color = "Year 2016")) +
+        geom_point(data = future_rates_DEUT_female[which(future_rates_DEUT_female$Year == 2026)], aes(x = Age, y = log_mortality, color = "Year 2026")) +
+        geom_point(data = future_rates_DEUT_female[which(future_rates_DEUT_female$Year == 2036)], aes(x = Age, y = log_mortality, color = "Year 2036")) +
+        geom_point(data = future_rates_DEUT_female[which(future_rates_DEUT_female$Year == 2046)], aes(x = Age, y = log_mortality, color = "Year 2046"))
+
+plot_DEUT_Male <- ggplot() +
+        ggtitle("DEUT Male") +
+        geom_point(data = future_rates_DEUT_male[which(future_rates_DEUT_male$Year == 2006)], aes(x = Age, y = log_mortality, color = "Year 2006")) +
+        geom_point(data = future_rates_DEUT_male[which(future_rates_DEUT_male$Year == 2016)], aes(x = Age, y = log_mortality, color = "Year 2016")) +
+        geom_point(data = future_rates_DEUT_male[which(future_rates_DEUT_male$Year == 2026)], aes(x = Age, y = log_mortality, color = "Year 2026")) +
+        geom_point(data = future_rates_DEUT_male[which(future_rates_DEUT_male$Year == 2036)], aes(x = Age, y = log_mortality, color = "Year 2036")) +
+        geom_point(data = future_rates_DEUT_male[which(future_rates_DEUT_male$Year == 2046)], aes(x = Age, y = log_mortality, color = "Year 2046"))
+
+print(plot_DEUT_Female)
+print(plot_DEUT_Male)
