@@ -67,7 +67,7 @@ callback_list <- list(lr_reducer)
 model_name <- paste0(model_type, length(unit_sizes),"_", age_range, "_", feature_dimension0, "_",
                     feature_dimension1, "_", feature_dimension2)
 #file.name <- paste("./Model_Full_Param/best_model_", name.model, sep="")
-file_name <- paste0("./CallBack/best_model_", model_name)
+file_name <- paste0("./CallBack/best_model_", model_name, ".h5")
 
 # define Callback to save best model w.r.t. loss value (mse)
 CBs <- NULL
@@ -89,3 +89,4 @@ out_of_sample_loss(model, data, countries, timesteps, age_range, last_observed_y
 
 # Calculate in-sample loss
 #mean((-as.vector(model %>% predict(x_train)) - (-y_train))^2)
+future_rates <- project_future_rates(model, data, countries, timesteps, age_range, last_observed_year)
