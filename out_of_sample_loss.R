@@ -132,6 +132,17 @@ out_of_sample_loss <- function(model, data, countries, timesteps, age_range, las
                 #table[2*country_index + 2, 2] <- mean((prediction$log_mortality - y_test_male$log_mortality)^2)
         }
 
+        print(paste0("Average MSE for recurrent net: ", mean(table[1:(2*length(countries)), 1])))
+        print(paste0("Average MSE for feedforward net: ", mean(table[1:(2*length(countries)), 2])))
+        print(paste0("Average MSE for Lee-Carter model: ", mean(table[1:(2*length(countries)), 3])))
+
+        print(table)
+
+        print(paste0("The predictions of the recurrent network are better than those of the feedforward net in ", sum(table[1:(2*length(countries)), 1] < table[1:(2*length(countries)), 2]), 
+        " out of ", 2*length(countries), " country-gender groups of mortality rates."))
+        print(paste0("The predictions of the recurrent network are better than those of the Lee-Carter model in ", sum(table[1:(2*length(countries)), 1] < table[1:(2*length(countries)), 3]), 
+        " out of ", 2*length(countries), " country-gender groups of mortality rates."))
+
         return(table)
 
 }
