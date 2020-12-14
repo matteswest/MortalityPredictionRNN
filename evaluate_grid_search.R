@@ -1,5 +1,6 @@
 # This script evaluates the models created by the grid search.
 
+library(tidyverse)
 library(dplyr)
 library(keras)
 library(tfruns)
@@ -9,7 +10,8 @@ library(data.table)
 source("out_of_sample_loss.R")
 source("create_model.R")
 
-use_kaggle <- FALSE
+use_kaggle <- TRUE
+model_index <- 1
 
 # fixed parameters
 last_observed_year <- 2006
@@ -29,20 +31,20 @@ data <- data[which(data$Country %in% countries),]
 if (use_kaggle) {
         results <- ls_runs(order = metric_val_loss, decreasing= F, runs_dir = 'grid_search_kaggle')
         results <- select(results, -c(output))
-        unit_sizes <- c(results[1,11], results[1,12], results[1,13], results[1,14], results[1,15])
-        unit_sizes <- unit_sizes[1:results[1,10]]
-        if (results[1,7] == "LSTM") {
-                model <- create_lstm_model(c(results[1,8], results[1,9]), unit_sizes, results[1,17], results[1,18], results[1,19], 0)
+        unit_sizes <- c(results[model_index,11], results[model_index,12], results[model_index,13], results[model_index,14], results[model_index,15])
+        unit_sizes <- unit_sizes[1:results[model_index,10]]
+        if (results[model_index,7] == "LSTM") {
+                model <- create_lstm_model(c(results[model_index,8], results[model_index,9]), unit_sizes, results[model_index,17], results[model_index,18], results[model_index,19], 0)
         }
         else {
-                model <- create_gru_model(c(results[1,8], results[1,9]), unit_sizes, results[1,17], results[1,18], results[1,19], 0)
+                model <- create_gru_model(c(results[model_index,8], results[model_index,9]), unit_sizes, results[model_index,17], results[model_index,18], results[model_index,19], 0)
         }
-        #load_model_weights_hdf5(model, paste0("./", results[1,1], "/best_model_weights.h5"))
-        load_model_weights_hdf5(model, paste0("./grid_search_kaggle/2020-12-09T15-47-35Z/best_model_weights.h5"))
+        load_model_weights_hdf5(model, paste0("./", results[model_index,1], "/best_model_weights.h5"))
+        #load_model_weights_hdf5(model, paste0("./grid_search_kaggle/2020-12-09T15-47-35Z/,"best_model_weights.h5"))
 } else {
         results <- ls_runs(order = metric_val_loss, decreasing= F, runs_dir = 'grid_search')
         results <- select(results, -c(output))
-        path <- paste0("./", results[1,1], "/best_model.h5")
+        path <- paste0("./", results[model_index,1], "/best_model.h5")
         model <- load_model_hdf5(path)
         summary(model)
 }
@@ -50,10 +52,10 @@ if (use_kaggle) {
 # Write to xlsx.
 writexl::write_xlsx(results, "./data/results.xlsx")
 
-out_of_sample_loss(model, data, countries, results[1,8], results[1,9], last_observed_year)
+out_of_sample_loss(model, data, countries, results[model_index,8], results[model_index,9], last_observed_year)
 
 # Project mortality rates
-future_rates <- project_future_rates(model, data, countries, results[1,8], results[1,9], last_observed_year, 40)
+future_rates <- project_future_rates(model, data, countries, results[model_index,8], results[model_index,9], last_observed_year, 40)
 future_rates_DEUT_female <- future_rates[[get_country_index("DEUT", countries) + 1]]$Female_Pred
 future_rates_DEUT_male <- future_rates[[get_country_index("DEUT", countries) + 1]]$Male_Pred
 
@@ -75,4 +77,3 @@ plot_DEUT_Male <- ggplot() +
 
 print(plot_DEUT_Female)
 print(plot_DEUT_Male)
-
