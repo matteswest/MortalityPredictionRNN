@@ -85,7 +85,7 @@ plot_loss(model_name, history[[2]]$val_loss, history[[2]]$loss)
 
 if (use_best_model) load_model_weights_hdf5(model, file_name)
 
-table <- out_of_sample_loss(model, data, countries, timesteps, age_range, last_observed_year)
+table <- out_of_sample_loss(c(model), data, countries, c(timesteps), c(age_range), last_observed_year)
 
 # Calculate in-sample loss
 #mean((-as.vector(model %>% predict(x_train)) - (-y_train))^2)

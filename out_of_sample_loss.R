@@ -55,7 +55,7 @@ recursive_prediction <- function(last_observed_years, subdata, gender, countries
 
 
 
-out_of_sample_loss <- function(model, data, countries, timesteps, age_range, last_observed_year) {
+out_of_sample_loss <- function(models, data, countries, timesteps, age_range, last_observed_year) {
 
         table <- matrix(0, length(countries) * 2, 3)
         colnames(table) <- c("MSE rec", "MSE ff", "MSE lc")
@@ -109,27 +109,34 @@ out_of_sample_loss <- function(model, data, countries, timesteps, age_range, las
         table[18, 3] <- 7.230708e-05
 
         for (country in countries) {
-                # Test data pre-processing.
-                x_test_female <- data[which((data$Year > (last_observed_year - timesteps)) & (Gender == "Female") & (Country == country)),]
-                y_test_female <- x_test_female[which(x_test_female$Year > last_observed_year),]
-                x_test_male <- data[which((data$Year > (last_observed_year-timesteps)) & (Gender == "Male") & (Country == country)),]
-                y_test_male <- x_test_male[which(x_test_male$Year > last_observed_year),]
-                
+                predicted_mortality_female <- replicate(101 * (range(data[which(data$Country == country)]$Year)[2] - last_observed_year), 0.0)
+                predicted_mortality_male <- replicate(101 * (range(data[which(data$Country == country)]$Year)[2] - last_observed_year), 0.0)
+                for (model_index in 1:length(models)) {
+                        # Test data pre-processing.
+                        x_test_female <- data[which((data$Year > (last_observed_year - timesteps[[model_index]])) & (Gender == "Female") & (Country == country)),]
+                        y_test_female <- x_test_female[which(x_test_female$Year > last_observed_year),]
+                        x_test_male <- data[which((data$Year > (last_observed_year - timesteps[[model_index]])) & (Gender == "Male") & (Country == country)),]
+                        y_test_male <- x_test_male[which(x_test_male$Year > last_observed_year),]
+
+                        # Female
+                        recursive_pred <- recursive_prediction(last_observed_year, x_test_female, "Female", countries, country, timesteps[[model_index]], age_range[[model_index]], models[[model_index]]) #, x_min, x_max)
+                        # Filter the predicted mortality rates.
+                        prediction <- recursive_pred[[1]][which(x_test_female$Year > last_observed_year),]
+                        predicted_mortality_female <- prediction$mortality + predicted_mortality_female
+
+                        # Male
+                        recursive_pred <- recursive_prediction(last_observed_year, x_test_male, "Male", countries, country, timesteps[[model_index]], age_range[[model_index]], models[[model_index]]) #, x_min, x_max)
+                        # Filter the predicted mortality rates.
+                        prediction <- recursive_pred[[1]][which(x_test_male$Year > last_observed_year),]
+                        predicted_mortality_male <- prediction$mortality + predicted_mortality_male
+                }
                 country_index <- get_country_index(country, countries)
 
-                # Female
-                recursive_pred <- recursive_prediction(last_observed_year, x_test_female, "Female", countries, country, timesteps, age_range, model) #, x_min, x_max)
-                # Filter the predicted mortality rates.
-                prediction <- recursive_pred[[1]][which(x_test_female$Year > last_observed_year),]
-                table[2*country_index + 1, 1] <- mean((prediction$mortality - y_test_female$mortality)^2)
-                #table[2*country_index + 1, 2] <- mean((prediction$log_mortality - y_test_female$log_mortality)^2)
+                predicted_mortality_female <- predicted_mortality_female / length(models)
+                predicted_mortality_male <- predicted_mortality_male / length(models)
 
-                # Male
-                recursive_pred <- recursive_prediction(last_observed_year, x_test_male, "Male", countries, country, timesteps, age_range, model) #, x_min, x_max)
-                # Filter the predicted mortality rates.
-                prediction <- recursive_pred[[1]][which(x_test_male$Year > last_observed_year),]
-                table[2*country_index + 2, 1] <- mean((prediction$mortality - y_test_male$mortality)^2)
-                #table[2*country_index + 2, 2] <- mean((prediction$log_mortality - y_test_male$log_mortality)^2)
+                table[2*country_index + 1, 1] <- mean((predicted_mortality_female - y_test_female$mortality)^2)
+                table[2*country_index + 2, 1] <- mean((predicted_mortality_male - y_test_male$mortality)^2)
         }
 
         print(paste0("Average MSE for recurrent net: ", mean(table[1:(2*length(countries)), 1])))

@@ -10,8 +10,10 @@ library(data.table)
 source("out_of_sample_loss.R")
 source("create_model.R")
 
-use_kaggle <- TRUE
-model_index <- 1
+# Number of models used for the calculation of the out of sample loss.
+number_of_models <- 4
+# Index of model to be used to project the future rates (must be smaller or equal to number_of_models).
+model_rank <- 1
 
 # fixed parameters
 last_observed_year <- 2006
@@ -27,10 +29,17 @@ data$mortality <- exp(data$log_mortality)
 # Filter relevant countries.
 data <- data[which(data$Country %in% countries),]
 
-# Load best model.
-if (use_kaggle) {
-        results <- ls_runs(order = metric_val_loss, decreasing= F, runs_dir = 'grid_search_kaggle')
-        results <- select(results, -c(output))
+results <- ls_runs(order = metric_val_loss, decreasing= F, runs_dir = 'grid_search')
+results <- select(results, -c(output))
+
+# Write to xlsx.
+writexl::write_xlsx(results, "./data/results.xlsx")
+
+# Load the models to be used for the predictions.
+models <- c()
+timesteps <- c()
+age_ranges <- c()
+for (model_index in 1:number_of_models) {
         unit_sizes <- c(results[model_index,11], results[model_index,12], results[model_index,13], results[model_index,14], results[model_index,15])
         unit_sizes <- unit_sizes[1:results[model_index,10]]
         if (results[model_index,7] == "LSTM") {
@@ -39,23 +48,18 @@ if (use_kaggle) {
         else {
                 model <- create_gru_model(c(results[model_index,8], results[model_index,9]), unit_sizes, results[model_index,17], results[model_index,18], results[model_index,19], 0)
         }
-        load_model_weights_hdf5(model, paste0("./", results[model_index,1], "/best_model_weights.h5"))
-        #load_model_weights_hdf5(model, paste0("./grid_search_kaggle/2020-12-09T15-47-35Z/,"best_model_weights.h5"))
-} else {
-        results <- ls_runs(order = metric_val_loss, decreasing= F, runs_dir = 'grid_search')
-        results <- select(results, -c(output))
-        path <- paste0("./", results[model_index,1], "/best_model.h5")
-        model <- load_model_hdf5(path)
-        summary(model)
+        load_model_weights_hdf5(model, paste0("./", results[model_index,1], "/best_model.h5"))
+
+        # Add models and parameters of the dataset to their corresponding lists.
+        models <- c(models, model)
+        timesteps <- c(timesteps, results[model_index, 8])
+        age_ranges <- c(age_ranges, results[model_index, 9])
 }
 
-# Write to xlsx.
-writexl::write_xlsx(results, "./data/results.xlsx")
-
-out_of_sample_loss(model, data, countries, results[model_index,8], results[model_index,9], last_observed_year)
+table <- out_of_sample_loss(models, data, countries, timesteps, age_ranges, last_observed_year)
 
 # Project mortality rates
-future_rates <- project_future_rates(model, data, countries, results[model_index,8], results[model_index,9], last_observed_year, 40)
+future_rates <- project_future_rates(models[[model_rank]], data, countries, results[model_rank,8], results[model_rank,9], last_observed_year, 40)
 future_rates_DEUT_female <- future_rates[[get_country_index("DEUT", countries) + 1]]$Female_Pred
 future_rates_DEUT_male <- future_rates[[get_country_index("DEUT", countries) + 1]]$Male_Pred
 
