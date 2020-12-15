@@ -65,8 +65,8 @@ lr_reducer <- callback_reduce_lr_on_plateau(monitor = "val_loss", factor = 0.1,
                                             min_delta = 1e-03, cooldown = 0, min_lr = 0)
 
 # use best model only
-use_best_model <- callback_model_checkpoint("best_model.h5", monitor = "val_loss", verbose = 1,
-                                            save_best_only = TRUE, save_weights_only = FALSE)
+use_best_model <- callback_model_checkpoint("best_model_weights.h5", monitor = "val_loss", verbose = 1,
+                                            save_best_only = TRUE, save_weights_only = TRUE)
 
 # fit model
 history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.1, batch_size = FLAGS$batch_size, epochs = 200, verbose = 1,
