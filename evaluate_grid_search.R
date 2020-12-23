@@ -48,7 +48,7 @@ for (model_index in 1:number_of_models) {
         else {
                 model <- create_gru_model(c(results[model_index,8], results[model_index,9]), unit_sizes, results[model_index,17], results[model_index,18], results[model_index,19], 0)
         }
-        load_model_weights_hdf5(model, paste0("./", results[model_index,1], "/best_model.h5"))
+        load_model_weights_hdf5(model, paste0("./", results[model_index,1], "/best_model_weights.h5"))
 
         # Add models and parameters of the dataset to their corresponding lists.
         models <- c(models, model)
