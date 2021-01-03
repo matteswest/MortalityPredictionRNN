@@ -10,8 +10,11 @@ library(data.table)
 source("out_of_sample_loss.R")
 source("create_model.R")
 
+# model type to be evaluated ("LSTM" or "GRU")
+model_type <- "LSTM"
+
 # Number of models used for the calculation of the out of sample loss.
-number_of_models <- 4
+number_of_models <- 1
 # Index of model to be used to project the future rates (must be smaller or equal to number_of_models).
 model_rank <- 1
 
@@ -29,7 +32,7 @@ data$mortality <- exp(data$log_mortality)
 # Filter relevant countries.
 data <- data[which(data$Country %in% countries),]
 
-results <- ls_runs(order = metric_val_loss, decreasing= F, runs_dir = 'grid_search')
+results <- ls_runs(order = metric_val_loss, decreasing= F, runs_dir = paste0('grid_search_', model_type))
 results <- select(results, -c(output))
 
 # Write to xlsx.
@@ -58,10 +61,60 @@ for (model_index in 1:number_of_models) {
 
 table <- out_of_sample_loss(models, data, countries, timesteps, age_ranges, last_observed_year)
 
+
 # Project mortality rates
 future_rates <- project_future_rates(models[[model_rank]], data, countries, results[model_rank,8], results[model_rank,9], last_observed_year, 40)
 future_rates_DEUT_female <- future_rates[[get_country_index("DEUT", countries) + 1]]$Female_Pred
 future_rates_DEUT_male <- future_rates[[get_country_index("DEUT", countries) + 1]]$Male_Pred
+
+# plot observed vs fitted mortality for germany female
+pred_year <- 2014
+plot_obs_approx <- ggplot() +
+        ggtitle(paste0("Observed vs fitted log-mortality in year ", pred_year)) + 
+        geom_point(data = data[which(data$Year == pred_year & data$Gender == "Female" & data$Country == "DEUT")],
+                  aes(x = Age, y = log_mortality, color = "Year 2014 (observed)")) +
+        geom_line(data = future_rates_DEUT_female[which(future_rates_DEUT_female$Year == pred_year)], 
+                  aes(x = Age, y = log_mortality, color = "Year 2014 (predicted)"))
+
+plot_obs_approx
+
+#  plot observed vs fitted mortality for all country-gender combinations
+library(gridExtra)
+
+plot_list <- vector("list", 18)
+
+counter <- 1
+for (country in countries){
+        future_rates_female <- future_rates[[get_country_index(country, countries) + 1]]$Female_Pred
+        future_rates_male <- future_rates[[get_country_index(country, countries) + 1]]$Male_Pred
+        
+        p_female <- ggplot() +
+                ggtitle(paste0(country, " Female")) +
+                geom_point(data = data[which(data$Year == pred_year & data$Gender == "Female" & data$Country == country)],
+                           aes(x = Age, y = log_mortality), color = "red", size = 0.5) +
+                geom_line(data = future_rates_female[which(future_rates_female$Year == pred_year)], 
+                          aes(x = Age, y = log_mortality),  color = "blue") +
+                theme(plot.title = element_text(color = "black", size=8, hjust = 0.5,face="bold"))
+        
+        p_male <- ggplot() +
+                ggtitle(paste0(country, " Male")) +
+                geom_point(data = data[which(data$Year == pred_year & data$Gender == "Male" & data$Country == country)],
+                           aes(x = Age, y = log_mortality), color = "red", size = 0.5) +
+                geom_line(data = future_rates_male[which(future_rates_male$Year == pred_year)], 
+                          aes(x = Age, y = log_mortality), color = "blue") +
+                theme(plot.title = element_text(color = "black", size=8, hjust = 0.5,face="bold"))
+        
+        
+        plot_list[[counter]] <- p_female
+        plot_list[[counter+1]] <- p_male
+        
+        counter <- counter + 2
+}
+
+plot_grid <- grid.arrange(grobs = plot_list, nrow = 3)
+
+ggsave(filename = "./plots/predictGrid.png", plot = plot_grid, dpi = 400, scale = 2)
+
 
 plot_DEUT_Female <- ggplot() +
         ggtitle("DEUT Female") +
