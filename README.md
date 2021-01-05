@@ -14,7 +14,6 @@ To perform a complete hyperparameter search to find the best performing models b
 of parameters do the following:
 
 1. Run the grid_search script using your parameter options in the beginning of the code. Note that, for performance issues, the tuning_run function in the last line of the code
-has the 'sample' parameter set to 0.01, so that it takes only a 1% sample of the possible parameter combinations. The script will then perform a grid search saving all models
-in a new subdirectory called 'grid_search_LSTM' or 'grid_search_GRU'. 
+has the 'sample' parameter set to 0.01, so that it takes only a 1% sample of the possible parameter combinations. The script will then perform a grid search (by executing the hyperparamters.R script for each model) saving all models in a new subdirectory called 'grid_search'. 
 
-2. To evaluate the results of the grid search you can use the evaluate_grid_search.R script.
+2. To evaluate the results of the grid search you can use the evaluate_grid_search.R script. Here you can activate and deactivate different evaluation methods.
