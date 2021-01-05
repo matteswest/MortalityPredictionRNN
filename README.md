@@ -10,7 +10,7 @@ There are two options:
 If you only want to create and fit a specific model with specific parameters you can use the script rnn_mortality.R and set the model parameters in
 the head of the code. 
 
-To perform a complete hyperparameter search to find the best performing models based on the Mean-Squared-Error using different combinations
+To perform a complete hyperparameter search in order to find the best performing models based on the Mean-Squared-Error using different combinations
 of parameters do the following:
 
 1. Run the grid_search script using your parameter options in the beginning of the code. Note that, for performance issues, the tuning_run function in the last line of the code
