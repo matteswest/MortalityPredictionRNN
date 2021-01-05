@@ -14,8 +14,8 @@ countries <- c("CHE", "DEUT", "DNK", "ESP", "FRATNP", "ITA", "JPN", "POL", "USA"
 # global parameters
 set.seed(10)
 parameters <- list(
-        model_type = c("LSTM"),
-        timesteps = c(5, 10, 15),#, 10, 15),
+        model_type = c("LSTM"), # has to be either "LSTM" or "GRU", both not possible
+        timesteps = c(5, 10, 15),
         age_range = c(5,7,9),
         layers = c(1,2,3,4),
         feature_dimension0 = c(20, 30, 40),
@@ -58,9 +58,4 @@ for (timesteps in parameters$timesteps){
 }
 
 
-# delete grid_search directory if exists
-#if (file.exists("./grid_search")){
-#        unlink("./grid_search", recursive = TRUE)
-#}
-
-runs <- tuning_run('hyperparameters.R', runs_dir = 'grid_search', sample = 0.01, flags = parameters)
+runs <- tuning_run('hyperparameters.R', runs_dir = paste0('grid_search_', parameters$model_type), sample = 0.01, flags = parameters)

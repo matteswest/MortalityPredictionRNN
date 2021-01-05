@@ -16,7 +16,7 @@ plot_grid <- FALSE
 show_projections <- TRUE
 
 # model type to be evaluated ("LSTM" or "GRU")
-model_type <- "GRU"
+model_type <- "LSTM"
 
 # Number of models used for the calculation of the out of sample loss.
 number_of_models <- 1
