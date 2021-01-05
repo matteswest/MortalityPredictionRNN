@@ -3,7 +3,7 @@
 # the best performing one.
 library(keras)
 library(tensorflow)
-tensorflow::tf$random$set_seed(10)
+#tensorflow::tf$random$set_seed(10)
 #use_session_with_seed(10, disable_gpu = TRUE, disable_parallel_cpu = FALSE, quiet = FALSE)
 
 source("create_model.R")
