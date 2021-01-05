@@ -11,8 +11,7 @@ source("data_preparation.R")
 last_observed_year <- 2006
 countries <- c("CHE", "DEUT", "DNK", "ESP", "FRATNP", "ITA", "JPN", "POL", "USA")
 
-# global parameters
-set.seed(10)
+# Global parameters to be considered in grid search.
 parameters <- list(
         model_type = c("LSTM"), # has to be either "LSTM" or "GRU", both not possible
         timesteps = c(5, 10, 15),
@@ -28,7 +27,7 @@ parameters <- list(
         output_activation = c("exponential", "linear")
 )
 
-# Create all combinations of training data
+# Create all combinations of training data once so they do not have to be computed for each model.
 # Load data.
 data <- fread("./data/mortality.csv")
 # Convert gender and country to factor variables.
@@ -49,6 +48,7 @@ for (timesteps in parameters$timesteps){
                         print("Create missing training data set...")
                         # Build training data
                         combined_training_set <- create_training_data(data, countries, timesteps, age_range, last_observed_year)
+                        # Save as memory efficient RDS-file.
                         saveRDS(combined_training_set, file = paste0("./data/training_data/training_set_", timesteps, "_", age_range, ".rds"))
                 } else {
                         print("Training data already exists.")
@@ -57,5 +57,6 @@ for (timesteps in parameters$timesteps){
         }
 }
 
-
+# Perform grid search. Set sample parameter to reduce number of combinations.
+set.seed(10)
 runs <- tuning_run('hyperparameters.R', runs_dir = paste0('grid_search_', parameters$model_type), sample = 0.01, flags = parameters)
