@@ -7,7 +7,7 @@ How to work with this repository:
 
 There are two options: 
 
-If you only want to create and fit a specific model with specific parameters you can use the script rnn_mortality.R and specify the parameters in
+If you only want to create and fit a specific model with specific parameters you can use the script rnn_mortality.R and set the model parameters in
 the head of the code. 
 
 To perform a complete hyperparameter search to find the best performing models based on the Mean-Squared-Error using different combinations
