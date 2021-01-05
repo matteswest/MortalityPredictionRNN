@@ -1,7 +1,7 @@
 # MortalityPredictionRNN
 
 This repository contains R code to model and predict mortality rates in 9 different countries using the Human Mortality Database (HMD) dataset which is stored in the 'data' directive. 
-The predictions are made using Recurrent Neural Networks, both LSTM and GRU architectures are possible. 
+The predictions are made using Recurrent Neural Networks based on R. Richman and M.V. Wüthrich's [code](https://github.com/JSchelldorfer/ActuarialDataScience/tree/master/6%20-%20Lee%20and%20Carter%20go%20Machine%20Learning%20Recurrent%20Neural%20Networks). Both LSTM and GRU architectures are possible. 
 
 How to work with this repository:
 
