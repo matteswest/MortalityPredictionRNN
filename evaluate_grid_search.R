@@ -11,9 +11,9 @@ source("out_of_sample_loss.R")
 source("create_model.R")
 
 # Verbose parameters
-calculate_loss <- FALSE
+calculate_loss <- TRUE
 plot_grid <- FALSE
-show_projections <- TRUE
+show_projections <- FALSE
 
 # model type to be evaluated ("LSTM" or "GRU")
 model_type <- "LSTM"
@@ -21,7 +21,7 @@ model_type <- "LSTM"
 # Number of models used for the calculation of the out of sample loss.
 number_of_models <- 1
 # Index of model to be used to project the future rates.
-model_rank <- 2
+model_rank <- 1
 
 # fixed parameters
 last_observed_year <- 2006
