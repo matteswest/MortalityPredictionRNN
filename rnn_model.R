@@ -3,7 +3,7 @@ library(tidyverse)
 library(data.table)
 library(keras)
 library(tensorflow)
-tensorflow::tf$random$set_seed(10)
+#tensorflow::tf$random$set_seed(10)
 
 # import source codes
 source("data_preparation.R")
