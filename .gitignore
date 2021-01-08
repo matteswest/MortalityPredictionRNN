@@ -9,3 +9,5 @@ MortalityPredictionRNN.Rproj
 CallBack
 data/results.xlsx
 grid_search_kaggle/
+grid_search_LSTM/
+grid_search_GRU/
