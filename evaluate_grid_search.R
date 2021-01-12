@@ -19,7 +19,7 @@ show_projections <- FALSE
 model_type <- "LSTM"
 
 # Number of models used for the calculation of the out of sample loss.
-number_of_models <- 1
+number_of_models <- 10
 # Index of model to be used to project the future rates.
 model_rank <- 1
 
@@ -135,7 +135,7 @@ if (plot_grid & show_projections){
         grid_plot <- grid.arrange(grobs = plot_list, nrow = 3)
         
         #ggsave(filename = "./plots/predictGrid.png", plot = grid_plot, dpi = 400, scale = 2)
-}
+
 
 
 plot_DEUT_Female <- ggplot() +
@@ -156,3 +156,5 @@ plot_DEUT_Male <- ggplot() +
 
 print(plot_DEUT_Female)
 print(plot_DEUT_Male)
+
+}
