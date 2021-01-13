@@ -34,7 +34,7 @@ data$mortality <- exp(data$log_mortality)
 # Filter relevant countries.
 data <- data[which(data$Country %in% countries),]
 
-# Shuffle the training data.
+# Create the training data.
 combined_training_set <- create_training_data(data, countries, timesteps, age_range, last_observed_year)
 x_train <- combined_training_set[[1]]
 y_train <- combined_training_set[[2]]
@@ -57,6 +57,7 @@ summary(model)
 optimizer <- optimizer_adam()
 model %>% compile(optimizer = optimizer, loss = "mse", metrics = list("mae"))
 
+# Add callbacks.
 lr_reducer <- callback_reduce_lr_on_plateau(monitor = "val_loss", factor = 0.1,
                                             patience = 25, verbose = 0, mode = "min",
                                             min_delta = 1e-03, cooldown = 0, min_lr = 0)
@@ -77,7 +78,7 @@ if (use_best_model) {
         callback_list <- c(callback_list, CBs)
 }
 
-# Fit model and measure time
+# Fit model and measure time.
 {current_time <- Sys.time()
         history <- model %>% fit(x = x_train, y = y_train, validation_split = 0.1, batch_size = 100, epochs = 100, verbose = 1, callbacks = callback_list)
 Sys.time() - current_time}
@@ -87,8 +88,7 @@ if (use_best_model) load_model_weights_hdf5(model, file_name)
 
 table <- out_of_sample_loss(c(model), data, countries, c(timesteps), c(age_range), last_observed_year)
 
-# Calculate in-sample loss
-#mean((-as.vector(model %>% predict(x_train)) - (-y_train))^2)
+# Project the future rates for the next 40 years.
 future_rates <- project_future_rates(model, data, countries, timesteps, age_range, last_observed_year, 40)
 future_rates_DEUT_female <- future_rates[[get_country_index("DEUT", countries) + 1]]$Female_Pred
 future_rates_DEUT_male <- future_rates[[get_country_index("DEUT", countries) + 1]]$Male_Pred
