@@ -8,8 +8,6 @@ recursive_prediction <- function(last_observed_years, subdata, gender, countries
         # Since the range of the years between the countries differ, we have to compute the last real observed year.
         last_year <- range(subdata$Year[which(subdata$Country == country)])[2]
 
-        yearly_mse <- array(NA, c(last_year - last_observed_years))
-
         for (current_year in ((last_observed_years+1):(last_year + number_of_projected_years))){
 
                 # If mortality rates are projected the table does not include a row for the current year, so this row has to be added to the data table.
@@ -36,7 +34,6 @@ recursive_prediction <- function(last_observed_years, subdata, gender, countries
                 x_test <- list(x_test, rep(gender_index, dim(x_test)[1]), rep(country_index, dim(x_test)[1]))
                 y_test <- - data_current_year[[2]]
 
-                # TODO: Use exponential function like in the above github repository.
                 # Predict the mortality rates for the current year.
                 y_hat <- - as.vector(model %>% predict(x_test))
 

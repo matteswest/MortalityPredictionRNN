@@ -7,7 +7,7 @@ library(tfruns)
 library(data.table)
 
 
-source("out_of_sample_loss.R")
+source("out_of_sample_calculations.R")
 source("create_model.R")
 
 # Verbose parameters

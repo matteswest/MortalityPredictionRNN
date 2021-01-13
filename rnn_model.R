@@ -8,7 +8,7 @@ library(tensorflow)
 # import source codes
 source("data_preparation.R")
 source("create_model.R")
-source("out_of_sample_loss.R")
+source("out_of_sample_calculations.R")
 
 # Set variable parameters.
 model_type <- "LSTM"
