@@ -2,7 +2,7 @@
 source("helper_functions.R")
 
 # function that outputs training data set ( x_(t,x), Y_(t,x) )
-data_preprocessing <- function(data, gender, country, timesteps, age_range, last_observed_years = 1999) { 
+data_preprocessing <- function(data, gender, country, timesteps, age_range, last_observed_years = 2006) { 
 
         # Get the log mortalities for the given gender and country.
         mort_rates <- data[which((data$Gender == gender) & (data$Country == country)), c("Year", "Age", "log_mortality")] 
