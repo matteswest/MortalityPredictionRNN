@@ -3,13 +3,13 @@ source("helper_functions.R")
 
 
 
+# Recursively apply the model to predict the mortality rates for the future and unknown years.
 recursive_prediction <- function(last_observed_years, subdata, gender, countries, country, timesteps, feature_dimension, model, number_of_projected_years = 0) {#, x_min, x_max){
 
         # Since the range of the years between the countries differ, we have to compute the last real observed year.
         last_year <- range(subdata$Year[which(subdata$Country == country)])[2]
 
         for (current_year in ((last_observed_years+1):(last_year + number_of_projected_years))){
-
                 # If mortality rates are projected the table does not include a row for the current year, so this row has to be added to the data table.
                 if (current_year > last_year) {
                         new_row <- subdata[which(subdata$Year == (current_year - 1))]
@@ -17,11 +17,13 @@ recursive_prediction <- function(last_observed_years, subdata, gender, countries
                         subdata <- rbind(subdata, new_row)
                 }
 
-                # Select only the necessary for the current year.
+                # Select only the necessary data for the current year (current_year - timesteps until current_year).
                 data_current_year <- data_preprocessing(subdata[which(subdata$Year >= (current_year - timesteps)),], gender, country, timesteps, feature_dimension, current_year)
 
                 # MinMaxScaler (with minimum and maximum from above)
                 #x_test <- array(2*(data_current_year[[1]]-x_min)/(x_min-x_max)-1, dim(data_current_year[[1]]))
+                
+                # Get mortality rates for the prediction of the current year.
                 x_test <- array(data_current_year[[1]], dim(data_current_year[[1]]))
 
                 if (gender == "Female")
@@ -31,8 +33,8 @@ recursive_prediction <- function(last_observed_years, subdata, gender, countries
 
                 country_index <- get_country_index(country, countries)
 
+                # Create the complete test set for the prediction of the current year.
                 x_test <- list(x_test, rep(gender_index, dim(x_test)[1]), rep(country_index, dim(x_test)[1]))
-                y_test <- - data_current_year[[2]]
 
                 # Predict the mortality rates for the current year.
                 y_hat <- - as.vector(model %>% predict(x_test))
@@ -52,8 +54,10 @@ recursive_prediction <- function(last_observed_years, subdata, gender, countries
 
 
 
+# Calculate the out of sample loss for a given list of countries using one or multiple models.
 out_of_sample_loss <- function(models, data, countries, timesteps, age_range, last_observed_year) {
 
+        # Create table for the mean squared errors to be returned.
         table <- matrix(0, length(countries) * 2, 3)
         colnames(table) <- c("MSE rec", "MSE ff", "MSE lc")
         row_names <- c()
@@ -105,9 +109,12 @@ out_of_sample_loss <- function(models, data, countries, timesteps, age_range, la
         table[17, 3] <- 1.042052e-05	
         table[18, 3] <- 7.230708e-05
 
+        # Apply the recursive prediction for all country-gender combinations.
         for (country in countries) {
                 predicted_mortality_female <- replicate(101 * (range(data[which(data$Country == country)]$Year)[2] - last_observed_year), 0.0)
                 predicted_mortality_male <- replicate(101 * (range(data[which(data$Country == country)]$Year)[2] - last_observed_year), 0.0)
+                
+                # Use an ensemble of models to predict the mortality rates for the current country.
                 for (model_index in 1:length(models)) {
                         # Test data pre-processing.
                         x_test_female <- data[which((data$Year > (last_observed_year - timesteps[[model_index]])) & (Gender == "Female") & (Country == country)),]
@@ -119,19 +126,23 @@ out_of_sample_loss <- function(models, data, countries, timesteps, age_range, la
                         recursive_pred <- recursive_prediction(last_observed_year, x_test_female, "Female", countries, country, timesteps[[model_index]], age_range[[model_index]], models[[model_index]]) #, x_min, x_max)
                         # Filter the predicted mortality rates.
                         prediction <- recursive_pred[[1]][which(x_test_female$Year > last_observed_year),]
+                        # Sum up the predictions.
                         predicted_mortality_female <- prediction$mortality + predicted_mortality_female
 
                         # Male
                         recursive_pred <- recursive_prediction(last_observed_year, x_test_male, "Male", countries, country, timesteps[[model_index]], age_range[[model_index]], models[[model_index]]) #, x_min, x_max)
                         # Filter the predicted mortality rates.
                         prediction <- recursive_pred[[1]][which(x_test_male$Year > last_observed_year),]
+                        # Sum up the predictions.
                         predicted_mortality_male <- prediction$mortality + predicted_mortality_male
                 }
                 country_index <- get_country_index(country, countries)
 
+                # Compute arithmetic mean.
                 predicted_mortality_female <- predicted_mortality_female / length(models)
                 predicted_mortality_male <- predicted_mortality_male / length(models)
 
+                # Write mean squared errors into the table.
                 table[2*country_index + 1, 1] <- mean((predicted_mortality_female - y_test_female$mortality)^2)
                 table[2*country_index + 2, 1] <- mean((predicted_mortality_male - y_test_male$mortality)^2)
         }
@@ -153,21 +164,24 @@ out_of_sample_loss <- function(models, data, countries, timesteps, age_range, la
 
 
 
+# Project the mortality rates for every given country for the next years.
 project_future_rates <- function(model, data, countries, timesteps, age_range, last_observed_year, number_of_projected_years) {
 
+        # Loop over every given country to calculate the prediction for the next number_of_projected_years.
         country_projections <- vector("list", length(countries))
         list_index <- 1
         for (country in countries) {
+                # Get relevant data.
                 x_test_female <- data[which((data$Year > (last_observed_year - timesteps)) & (Gender == "Female") & (Country == country)),]
                 y_test_female <- x_test_female[which(x_test_female$Year > last_observed_year),]
                 x_test_male <- data[which((data$Year > (last_observed_year-timesteps)) & (Gender == "Male") & (Country == country)),]
                 y_test_male <- x_test_male[which(x_test_male$Year > last_observed_year),]
 
-                # Female
+                # Recursive prediction with respect to the gender.
                 recursive_pred_female <- recursive_prediction(last_observed_year, x_test_female, "Female", countries, country, timesteps, age_range, model, number_of_projected_years) #, x_min, x_max)
-                # Male
                 recursive_pred_male <- recursive_prediction(last_observed_year, x_test_male, "Male", countries, country, timesteps, age_range, model, number_of_projected_years) #, x_min, x_max)
                 
+                # Store projections in list.
                 country_projections[[list_index]] <- list("Country" = country, "Female_Pred" = recursive_pred_female[[1]],
                                                           "Male_Pred" = recursive_pred_male[[1]])
                 
