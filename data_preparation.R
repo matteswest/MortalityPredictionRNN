@@ -1,7 +1,8 @@
 # Functions for data preprocessing
 source("helper_functions.R")
 
-# function that outputs training data set ( x_(t,x), Y_(t,x) )
+# This function creates the training data for one particular country-gender combination based on the number of timesteps,
+# the number of surrounding ages and the last year in which mortality rates were observed.
 data_preprocessing <- function(data, gender, country, timesteps, age_range, last_observed_years = 2006) { 
 
         # Get the log mortalities for the given gender and country.
@@ -18,19 +19,25 @@ data_preprocessing <- function(data, gender, country, timesteps, age_range, last
                         train_rates <- as.matrix(cbind(train_rates[,1], train_rates[,2], train_rates[,-1], train_rates[,ncol(train_rates)]))
                 }
         }
+
+        # Since the first column contains the years, remove it.
         train_rates <- train_rates[,-1]
+
+        # Calculate the number of training samples for this one particular country-gender combination.
         (n_years <- nrow(train_rates)-(timesteps-1)-1)
         (n_ages <- ncol(train_rates)-(age_range-1)) 
-        (n_train <- n_years * n_ages) # number of training samples
+        (n_train <- n_years * n_ages)
+
+        # Create the training for this one particular country-gender combination.
         xt_train <- array(NA, c(n_train, timesteps, age_range))
         yt_train <- array(NA, c(n_train))
-
         for (t0 in (1:n_years)){
                 for (a0 in (1:n_ages)){
                         xt_train[(t0-1)*n_ages+a0,,] <- train_rates[t0:(t0 + timesteps - 1), a0:(a0+age_range-1)]
                         yt_train[(t0-1)*n_ages+a0] <- train_rates[t0 + timesteps, a0+delta0]
                 }
         }
+
         list(xt_train, yt_train)
 
 }
