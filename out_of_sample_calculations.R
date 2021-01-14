@@ -4,7 +4,7 @@ source("helper_functions.R")
 
 
 # Recursively apply the model to predict the mortality rates for the future and unknown years.
-recursive_prediction <- function(last_observed_years, subdata, gender, countries, country, timesteps, feature_dimension, model, number_of_projected_years = 0) {#, x_min, x_max){
+recursive_prediction <- function(last_observed_years, subdata, gender, countries, country, timesteps, age_range, model, number_of_projected_years = 0) {#, x_min, x_max){
 
         # Since the range of the years between the countries differ, we have to compute the last real observed year.
         last_year <- range(subdata$Year[which(subdata$Country == country)])[2]
@@ -18,7 +18,7 @@ recursive_prediction <- function(last_observed_years, subdata, gender, countries
                 }
 
                 # Select only the necessary data for the current year (current_year - timesteps until current_year).
-                data_current_year <- data_preprocessing(subdata[which(subdata$Year >= (current_year - timesteps)),], gender, country, timesteps, feature_dimension, current_year)
+                data_current_year <- data_preprocessing(subdata[which(subdata$Year >= (current_year - timesteps)),], gender, country, timesteps, age_range, current_year)
 
                 # MinMaxScaler (with minimum and maximum from above)
                 #x_test <- array(2*(data_current_year[[1]]-x_min)/(x_min-x_max)-1, dim(data_current_year[[1]]))
