@@ -59,7 +59,7 @@ model %>% compile(optimizer = optimizer, loss = "mse", metrics = list("mae"))
 
 # Add callbacks.
 lr_reducer <- callback_reduce_lr_on_plateau(monitor = "val_loss", factor = 0.1,
-                                            patience = 25, verbose = 0, mode = "min",
+                                            patience = 25, verbose = 1, mode = "min",
                                             min_delta = 1e-03, cooldown = 0, min_lr = 0)
 
 callback_list <- list(lr_reducer)
